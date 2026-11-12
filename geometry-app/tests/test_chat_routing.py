@@ -207,6 +207,71 @@ def test_explicit_search_uses_the_question_and_bounded_nonduplicate_evidence(mon
     assert reply['searchStatus'] == 'found' and reply['grading'] is None
 
 
+def test_greeting_recovers_from_conflicting_json_without_searching(monkeypatch):
+    calls=[]
+
+    async def complete(messages, **kwargs):
+        calls.append(kwargs)
+        assert kwargs['api_key']==KEY and kwargs['provider']==OPTIONS
+        assert not kwargs['structured'] and 'JSON' not in kwargs['system']
+        assert messages[-1].content=='hi hi!'
+        if len(calls)==1:
+            return {'content':'{"mode":"conversation","content":"Hello"}'
+                              '{"mode":"conversation","content":"Hi"}','finishReason':'stop'}
+        assert len(calls)==2
+        return completion('Hi! How can I help?',searchQuery='hi')
+
+    async def search(*args, **kwargs):
+        pytest.fail('A standalone greeting does not use web search')
+
+    monkeypatch.setattr(ai,'complete',complete)
+    monkeypatch.setattr(ai,'search_web',search)
+    reply=post([{'role':'user','content':'hi hi!'}],webSearch=True)
+    assert len(calls)==2
+    assert reply['content']=='Hi! How can I help?'
+    assert reply['sources']==[] and reply['searchStatus'] is None
+    assert reply['mode']=='conversation' and not reply['pdfEligible']
+
+
+@pytest.mark.parametrize('recover',[True,False])
+def test_bad_reply_after_search_is_retried_without_repeating_the_search(monkeypatch,recover):
+    calls,queries=[],[]
+    question='请查北京今天的天气。'
+    evidence={'title':'Forecast','url':'https://example.com/beijing','content':'北京天气资料'}
+    malformed='{"id":"message","mode":"conversation","content":"unfinished'
+
+    async def search(query, **kwargs):
+        queries.append(query)
+        return [evidence]
+
+    async def complete(messages, **kwargs):
+        calls.append(messages)
+        if len(calls)==1:
+            return completion('',searchQuery='北京 今日天气预报')
+        assert len(calls)<=3
+        assert messages[-1].content==question
+        assert any(evidence['url'] in message.content for message in messages)
+        if len(calls)==3 and recover:
+            return completion('预报为晴。')
+        return {'content':malformed,'finishReason':'stop'}
+
+    monkeypatch.setattr(ai,'complete',complete)
+    monkeypatch.setattr(ai,'search_web',search)
+    response=TestClient(app).post('/api/ai/chat',headers={'X-AI-Api-Key':KEY},json={
+        'messages':[{'role':'user','content':question}], 'keyMode':'personal',
+        'provider':OPTIONS.model_dump(),
+    })
+    assert len(calls)==3 and queries==['北京 今日天气预报']
+    if recover:
+        assert response.status_code==200
+        assert response.json()['content']=='预报为晴。'
+        assert response.json()['sources']==[{'title':evidence['title'],'url':evidence['url']}]
+    else:
+        assert response.status_code==502
+        assert set(response.json())=={'detail'}
+        assert evidence['url'] not in response.text and 'unfinished' not in response.text
+
+
 @pytest.mark.parametrize('structured', [False, True])
 def test_provider_adapter_does_not_force_the_selected_models_thinking_off(structured):
     _, body = request_body([ai.Message(role='user', content='Check this calculation.')],

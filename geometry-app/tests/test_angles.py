@@ -1,9 +1,11 @@
 import math
 import pytest
 import z3
+from fastapi.testclient import TestClient
 from server.angles import cosine_constant
 from server.models import Problem, Relation
 from server.constraints import ConstraintSystem
+from server.main import app
 from server.topics import decode_import
 import json
 
@@ -145,3 +147,48 @@ def test_internal_unknown_status_is_never_a_user_facing_message(monkeypatch):
     result=system.analyze()
     assert result['outcome']=='unknown' and '未完成' in result['message']
     assert result['solverReason']=='unknown'
+
+
+@pytest.mark.parametrize('given',['shape','coordinates','length'])
+def test_layout_verifies_a_mirrored_angle_drawing_in_its_display_frame(given):
+    problem=angle_problem()
+    # Triangle ABC has angles 30°, 40°, 110° and a unit base. The sine
+    # rule gives the coordinates and the length of AC independently.
+    angle=math.radians
+    ab=math.sin(angle(40))/math.sin(angle(110))
+    ac=math.sin(angle(30))/math.sin(angle(110))
+    model={'A':ab*complex(math.cos(angle(30)),math.sin(angle(30))),
+           'B':0j,'C':1+0j,'D':ac+0j}
+    rotation=75+30j if given!='length' else 3+4j
+    for point in problem.points:
+        value=complex(232,-450)+rotation*model[point.id].conjugate()
+        point.x,point.y=value.real,value.imag
+    if given=='coordinates':
+        problem.conditions.extend(
+            Relation(id='coordinate-'+p.id,kind='fixed_point',args=[p.id],coordinates=[p.x,p.y])
+            for p in problem.points if p.id in ('B','C')
+        )
+    elif given=='length':
+        problem.conditions.append(Relation(id='metric-base',kind='fixed_length',args=['B','C'],value=5))
+
+    pin=next(p for p in problem.points if p.id=='D')
+    with TestClient(app) as client:
+        response=client.post('/api/validate',json={
+            'problem':problem.model_dump(),
+            'pinned':pin.model_dump(),
+            'fixedPoints':['A','B','C'],
+            'pinTolerance':0.0002,
+        })
+    assert response.status_code==200
+    result=response.json()
+    assert result['status']=='sat',result
+    xy={p['id']:complex(p['x'],p['y']) for p in result['points']}
+    for p in problem.points:
+        assert xy[p.id].real==pytest.approx(p.x,abs=0.0002,rel=0)
+        assert xy[p.id].imag==pytest.approx(p.y,abs=0.0002,rel=0)
+    assert abs(xy['A']-xy['C'])==pytest.approx(abs(xy['B']-xy['D']),abs=1e-9)
+    if given=='coordinates':
+        assert xy['B']==complex(232,-450)
+        assert xy['C']==complex(307,-420)
+    if given=='length':
+        assert abs(xy['B']-xy['C'])==pytest.approx(5,abs=1e-9)

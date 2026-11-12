@@ -38,9 +38,9 @@ def construction_plan(problem):
     return None
 
 
-def exact_angle_models(problem, *, follow_placement=False):
+def exact_angle_models(problem, *, follow_placement=False, layout=False):
     active=[r for r in problem.conditions if r.enabled]
-    if any(r.kind in ('fixed_point','fixed_length','free_text') for r in active) or problem.goal.kind=='minimize':return None
+    if any(r.kind in ('fixed_point','fixed_length','free_text') for r in active) or (not layout and problem.goal.kind=='minimize'):return None
     plan=construction_plan(problem)
     if plan is None:return None
     # Lazy import keeps the general constraint encoder independent of this path.

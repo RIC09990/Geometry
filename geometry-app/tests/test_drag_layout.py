@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import math
+import z3
 from server.models import LayoutRequest,Problem,Point
 from server.constraints import ConstraintSystem
 
@@ -76,3 +77,23 @@ def test_full_placement_verifies_more_than_eight_vertices():
     result=ConstraintSystem(request.problem,normalize=False).layout(fixed_points=request.fixedPoints,pin_tolerance=request.pinTolerance)
     assert result['status']=='sat',result
     assert len(result['points'])==11
+
+
+def test_timeout_in_a_preferred_neighbourhood_does_not_block_layout(monkeypatch):
+    p=preset(1)
+    fixed=p.points[1]
+    system=ConstraintSystem(p,normalize=False)
+    check=system.solver.check
+    calls=0
+
+    def timeout_once():
+        nonlocal calls
+        calls+=1
+        return z3.unknown if calls==1 else check()
+
+    monkeypatch.setattr(system.solver,'check',timeout_once)
+    result=system.layout(fixed_points=[fixed.id])
+    assert result['status']=='sat',result
+    actual=next(p for p in result['points'] if p['id']==fixed.id)
+    assert (actual['x'],actual['y'])==(fixed.x,fixed.y)
+    assert calls>1

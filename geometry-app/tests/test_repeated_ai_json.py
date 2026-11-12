@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from pypdf import PdfReader
 
 from server import ai
-from server.homework import parse_tutor_reply,read_ai_json,has_grading_payload
+from server.homework import parse_tutor_reply,read_ai_json,has_grading_payload,TutorReplyFormatError
 from server.main import app
 from server.topics import read_json
 from server import topics
@@ -31,6 +31,8 @@ def test_valid_json_keeps_literal_json_examples_inside_the_answer():
     content='An example: {"content":"not an extra answer"}.\n'+r'\(\frac12\)'
     source=json.dumps({'mode':'conversation','content':content})
     assert parse_tutor_reply(source).content==content
+    markdown='An example:\n```json\n{"content":"example value"}\n```'
+    assert parse_tutor_reply(markdown).content==markdown
 
 
 def test_repeated_grading_still_passes_through_the_consistency_guard():
@@ -42,9 +44,7 @@ def test_repeated_grading_still_passes_through_the_consistency_guard():
 def test_conflicting_objects_are_never_selected_or_displayed_as_protocol_text():
     source=json.dumps({'mode':'homework','content':'Correct.','exportPdf':True})+'\n'+json.dumps({'mode':'homework','content':'Incorrect.'})
     with pytest.raises(ValueError):read_ai_json(source)
-    reply=parse_tutor_reply(source)
-    assert '回复格式异常' in reply.content and '"mode"' not in reply.content
-    assert reply.grading is None and not reply.exportPdf
+    with pytest.raises(TutorReplyFormatError):parse_tutor_reply(source)
     with pytest.raises(HTTPException):read_json(source)
 
 

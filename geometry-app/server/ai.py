@@ -5,6 +5,7 @@ import base64
 import io
 import time
 import logging
+import re
 from collections import deque
 from typing import Literal
 
@@ -15,13 +16,14 @@ from pydantic import Field, model_validator
 from .chat_context import prepare_chat_messages
 from .config import setting
 from .models import StrictModel,Problem
-from .homework import tutor_instructions,parse_tutor_reply,homework_verification_instructions,checked_homework_reply,has_grading_payload,TutorReply,Grading
+from .homework import tutor_instructions,parse_tutor_reply,homework_verification_instructions,checked_homework_reply,has_grading_payload,TutorReply,TutorReplyFormatError,Grading
 from .ai_providers import ProviderOptions,PRESETS,resolve_provider,server_key,endpoint,check_destination,request_body,provider_headers,response_text,search as provider_search,list_models as provider_models
 
 router = APIRouter(prefix='/api/ai')
 capacity = asyncio.Semaphore(2)
 recent_requests: deque[float] = deque()
 SYSTEM = '你是 Geometry小助手，英文名 Geometry Assistant。'
+GREETING = re.compile(r'(?:(?:hi|hello|hey|你好|您好|嗨|哈[喽啰]|早上好|下午好|晚上好)(?:[\s!！.。?？,，]+|$))+',re.I)
 
 
 class ImageInput(StrictModel):
@@ -218,13 +220,19 @@ async def dispatch(request:ChatRequest,personal_key:str|None,system=SYSTEM,*,str
     async with capacity:
         messages=request.messages
         sources=[];search_status=None;query=None;base_system=system
+        latest=messages[-1]
+        greeting=(verify_homework and search_query==latest.content and not latest.images
+                  and GREETING.fullmatch(latest.content.strip()) is not None)
+        if greeting:
+            system=('You are Geometry Assistant. Reply directly to the greeting in English.'
+                    if request.language=='en' else SYSTEM+'\n请直接回应问候，只返回正文。')
         # Image-only submissions often contain only the UI's "see attachment"
         # placeholder. Read the image before selecting a meaningful search query.
-        image_query=request.webSearch and bool(messages[-1].images) and (not search_query or search_query==messages[-1].content)
+        image_query=request.webSearch and bool(latest.images) and (not search_query or search_query==latest.content)
         if image_query:
             system+='\n用户开启了联网搜索。请先读取本次图片、理解实际题意，再按需要返回具体的 searchQuery；不要检索“请查看附件”或“see attachment”等占位提示。'
-        if request.webSearch and not image_query:
-            query=(search_query or messages[-1].content).replace('\n',' ')[:400].strip()
+        if request.webSearch and not image_query and not greeting:
+            query=(search_query or latest.content).replace('\n',' ')[:400].strip()
             try:
                 sources=await search_web(query,api_key=key,provider=options)
                 search_status='found' if sources else 'empty'
@@ -232,29 +240,53 @@ async def dispatch(request:ChatRequest,personal_key:str|None,system=SYSTEM,*,str
             except HTTPException:search_status='unavailable'
         if search_status in ('empty','unavailable'):
             system+='\n本轮未获取到实时检索资料；不要编造实时事实或声称已查询成功，可以正常回答不依赖实时资料的部分。'
-        response=await complete(messages,language=request.language,api_key=key,provider=options,system=system,**({'structured':True} if structured else {}))
-        draft=parse_tutor_reply(response['content']) if structured else None
+
+        format_retry_used=False
+        async def ask():
+            nonlocal format_retry_used
+            prompt=system
+            while True:
+                reply=await complete(messages,language=request.language,api_key=key,provider=options,
+                                     system=prompt,structured=structured and not greeting)
+                if not structured:
+                    return reply,None
+                try:
+                    parsed=parse_tutor_reply(reply['content'],add_score=False)
+                    if greeting:
+                        if not parsed.content.strip():
+                            raise TutorReplyFormatError('Greeting requires reply text')
+                        parsed=TutorReply(mode='conversation',content=parsed.content)
+                        reply={**reply,'content':parsed.model_dump_json()}
+                    return reply,parsed
+                except TutorReplyFormatError:
+                    # Topic import and proof ideas have their own output schemas.
+                    if not verify_homework:
+                        return reply,None
+                    if format_retry_used:
+                        raise tutor_format_error(request.language) from None
+                    format_retry_used=True
+                    prompt=system+('\n请重新生成一条可读的问候。' if greeting
+                                   else '\n请重新回答，只输出一个完整的 JSON 对象，正文放在 content 中。')
+
+        response,draft=await ask()
         # Let the model request current facts when needed, rather than classifying
         # every user sentence with weather/geometry keyword rules.
         if draft and draft.searchQuery:
-            try:
-                requested_query=draft.searchQuery.strip()
-                if not requested_query:raise ValueError('Empty search request')
-                # An initial checkbox search may be too broad. Honor one refined
-                # query while still stopping repeated model search requests.
-                if requested_query != query:
-                    sources=await search_web(requested_query,api_key=key,provider=options)
+            # An initial checkbox search may be too broad. Honor one refined
+            # query while still stopping repeated model search requests.
+            if draft.searchQuery != query:
+                try:
+                    sources=await search_web(draft.searchQuery,api_key=key,provider=options)
                     search_status='found' if sources else 'empty'
-                if not sources:raise HTTPException(502,'No current sources')
+                except (HTTPException,TimeoutError):
+                    search_status='unavailable';sources=[]
+            if sources:
                 messages=[search_context(sources),*request.messages]
                 system=base_system
-                response=await complete(messages,language=request.language,api_key=key,provider=options,system=system,
-                                        structured=True)
-                draft=parse_tutor_reply(response['content'])
-                if draft.searchQuery:raise ValueError('Repeated search request')
-            except (HTTPException,TimeoutError,ValueError):
-                search_status='unavailable' if search_status!='empty' else 'empty'
-                sources=[]
+                response,draft=await ask()
+                if draft and draft.searchQuery:
+                    search_status='unavailable';sources=[]
+            if not sources:
                 notice=('Current information could not be retrieved. Please try again shortly.' if request.language=='en'
                         else '这次未能获取可靠的实时资料，请稍后重试。')
                 response={**response,'content':TutorReply(mode='conversation',content=notice).model_dump_json()}
@@ -302,6 +334,11 @@ def homework_failure_code(error):
     return known.get(str(error),'upstream' if isinstance(error,HTTPException) else 'timeout' if isinstance(error,TimeoutError) else 'invalid_structure')
 
 
+def tutor_format_error(language):
+    return HTTPException(502,'The AI service returned an unreadable reply. Please retry.' if language=='en'
+                         else 'AI 服务返回的回复格式不完整，请重试。')
+
+
 async def search_web(query:str,*,api_key:str,transport=None,provider=None):
     try:
         async with httpx.AsyncClient(timeout=45,transport=transport) as client:
@@ -335,7 +372,10 @@ async def review_proof(request:ProofReviewRequest,personal_key:str|None=Header(d
 
 
 async def tutor_response(response,images,language):
-    reply=parse_tutor_reply(response['content'])
+    try:
+        reply=parse_tutor_reply(response['content'])
+    except TutorReplyFormatError:
+        raise tutor_format_error(language) from None
     eligible=reply.mode=='homework' and bool(reply.grading and reply.grading.items)
     # An upstream object or a preceding turn cannot supply this turn's file.
     response={k:v for k,v in response.items() if k not in ('reportPdf','reportError','pdfEligible')}

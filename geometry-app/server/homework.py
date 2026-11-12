@@ -62,6 +62,16 @@ def tutor_instructions(review=False):
     )
 
 
+class TutorReplyFormatError(ValueError):
+    """The provider returned a broken tutor envelope instead of an answer."""
+
+
+def _tutor_json_source(content):
+    source=content.strip()
+    fenced=re.fullmatch(r'```(?:json)?[ \t]*\r?\n(.*?)\r?\n```',source,re.I|re.S)
+    return fenced[1] if fenced else source
+
+
 def homework_verification_instructions(draft:TutorReply):
     # Do not feed the model its own proposed correction as an answer to imitate.
     return ('这次批改的判断或评分未通过一致性检查。请独立重新核对原始作答，'
@@ -72,9 +82,7 @@ def homework_verification_instructions(draft:TutorReply):
 
 def has_grading_payload(content:str):
     """Distinguish optional feedback without scoring from malformed score data."""
-    source=content.strip()
-    if source.startswith('```'):source=source.split('\n',1)[-1].rsplit('```',1)[0]
-    try:data=read_ai_json(source)
+    try:data=read_ai_json(_tutor_json_source(content))
     except (ValueError,TypeError):return False
     if not isinstance(data,dict):return False
     body=re.sub(r'[*#_]','',str(data.get('content','')))
@@ -238,24 +246,35 @@ def read_ai_json(source):
 
 
 def parse_tutor_reply(content,*,add_score=True):
-    source=content.strip()
-    if source.startswith('```'):source=source.split('\n',1)[-1].rsplit('```',1)[0]
+    source=_tutor_json_source(content)
     try:data=read_ai_json(source)
     except (ValueError,TypeError):
-        # Protocol JSON is not a readable answer. It also must not become an
-        # exportable report or be sent back as assistant context on the next turn.
-        if re.match(r'^\s*\{\s*"(?:mode|content|grading|searchQuery|exportPdf)"\s*:',source):
-            return TutorReply(mode='conversation',content='AI 回复格式异常，未生成有效答案或报告，请重试。')
+        # Never promote a broken envelope to assistant text. Ordinary Markdown
+        # (including fenced code that is itself the answer) remains readable.
+        if re.match(r'^\s*(?:\{\s*(?:"|$)|\[\s*\{)',source) or (
+                re.match(r'```(?:json)?[ \t]*\r?\n',source,re.I)
+                and re.search(r'"(?:mode|content|grading|searchQuery|exportPdf)"\s*:',source)):
+            raise TutorReplyFormatError('Invalid tutor JSON') from None
+        if not source.strip():
+            raise TutorReplyFormatError('Empty tutor reply') from None
+        return TutorReply(content=content)
+    if not isinstance(data,dict):
+        if isinstance(data,list) and any(isinstance(item,dict) and 'content' in item for item in data):
+            raise TutorReplyFormatError('Multiple tutor replies')
         return TutorReply(content=content)
     try:
-        reply=TutorReply.model_validate(data)
+        reply=TutorReply.model_validate({'content':'',**data})
     except (ValueError,TypeError):
         # A bad grade must not hide an otherwise readable answer or create a
         # fabricated score/report. Preserve only validated user-facing content.
-        if isinstance(data,dict) and isinstance(data.get('content'),str):
-            mode=data.get('mode')
-            return TutorReply(content=data['content'],mode=mode if mode in ('solution','homework','conversation') else 'solution',exportPdf=data.get('exportPdf') is True)
-        return TutorReply(content=content)
+        if not isinstance(data.get('content'),str):
+            raise TutorReplyFormatError('Invalid tutor content') from None
+        mode=data.get('mode')
+        reply=TutorReply(content=data['content'],mode=mode if mode in ('solution','homework','conversation') else 'solution',exportPdf=data.get('exportPdf') is True)
+    if reply.searchQuery is not None:
+        reply.searchQuery=reply.searchQuery.strip() or None
+    if not reply.content.strip() and not reply.searchQuery:
+        raise TutorReplyFormatError('Empty tutor reply')
     if reply.mode!='homework':reply.grading=None
     if reply.grading and reply.grading.score is not None and add_score:
         g=reply.grading

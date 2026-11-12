@@ -6,9 +6,10 @@ from .models import Problem, Relation
 from .algebra import verify_witness
 
 class ConstraintSystem:
-    def __init__(self, problem: Problem, timeout=6000, normalize=True):
+    def __init__(self, problem: Problem, timeout=6000, normalize=True, *, layout_frame=False):
         self.problem=problem
         self.normalized=normalize
+        self.timeout=timeout
         self.ctx=z3.Context()
         self.xy={p.id:(z3.Real(p.id+"_x",ctx=self.ctx),z3.Real(p.id+"_y",ctx=self.ctx)) for p in problem.points}
         # Use the actual real-polynomial decision tactic rather than the generic
@@ -29,18 +30,24 @@ class ConstraintSystem:
         # A change of coordinates must preserve the statement being tested as
         # well as its premises. Otherwise BC=1, B=(0,0), or a directed arc can
         # become true solely because of the chosen coordinate frame.
-        relevant=[r for r in problem.conditions if r.enabled]+[problem.goal]
-        if normalize and problem.nondegenerate.triangles and not any(r.kind=='fixed_point' for r in relevant):
-            a,b,c=problem.nondegenerate.triangles[0]
+        active=[r for r in problem.conditions if r.enabled]
+        relevant=active if layout_frame else [*active,problem.goal]
+        triangle=problem.nondegenerate.triangles[0] if problem.nondegenerate.triangles else None
+        angle=next((r.args for r in active if r.kind=='fixed_angle'),None) if layout_frame else None
+        self.frame=None
+        if normalize and (triangle or angle) and not any(r.kind=='fixed_point' for r in relevant):
+            a,b,c=triangle or angle
             metric=any(r.kind in ('minimize','fixed_length') for r in relevant)
             oriented=any(r.kind=='on_arc' for r in relevant)
-            arc=next((r for r in problem.conditions if r.enabled and r.kind=='on_arc'),None)
+            arc=next((r for r in active if r.kind=='on_arc'),None)
             if arc:
                 center=arc.args[1];start=arc.args[3] if arc.orientation=='cw' else arc.args[2]
-                length=next((r.value for r in problem.conditions if r.enabled and r.kind=='fixed_length' and set(r.args)=={center,start}),None)
+                self.frame=(center,start)
+                length=next((r.value for r in active if r.kind=='fixed_length' and set(r.args)=={center,start}),None)
                 self.solver.add(self.xy[center][0]==0,self.xy[center][1]==0,self.xy[start][1]==0,
                     self.xy[start][0]==z3.RealVal(str(length),ctx=self.ctx) if length is not None else self.xy[start][0]>0 if metric else self.xy[start][0]==1)
             else:
+                self.frame=(b,c)
                 self.solver.add(self.xy[b][0]==0,self.xy[b][1]==0,self.xy[c][1]==0,
                                 self.xy[c][0]>0 if metric else self.xy[c][0]==1)
                 if not oriented:self.solver.add(self.xy[a][1]>0)
@@ -132,132 +139,173 @@ class ConstraintSystem:
             out[name]=[str(Fraction(v.numerator_as_long(),v.denominator_as_long())) for v in vals]
         return out
 
-    def layout(self,pinned=None,fixed_points=(),pin_tolerance=0):
-        fixed_points = set(fixed_points)
-        entire_placement = {p.id for p in self.problem.points} <= fixed_points | ({pinned.id} if pinned else set())
-        angle_shape=(not self.normalized
-                        and not any(r.enabled and r.kind=='fixed_point' for r in self.problem.conditions)
-                        and any(r.enabled and r.kind=='fixed_angle' for r in self.problem.conditions))
-        angle_fallback=angle_shape and not pinned and not fixed_points
-        if angle_fallback:self.solver.set(timeout=300)
-        if entire_placement and pin_tolerance and angle_shape:
-            witness=self.angle_layout(pinned,fixed_points,pin_tolerance,follow_placement=True)
-            if witness and witness['status']=='sat':return witness
-        for p in self.problem.points:
-            if p.id in fixed_points:
-                for i,value in enumerate([p.x,p.y]):
-                    coordinate=self.xy[p.id][i]
-                    # Fixed display anchors also originate in rounded browser
-                    # coordinates. Use the drag's display tolerance for them;
-                    # exact decimal anchors contradict e.g. an algebraic 40°.
-                    # Theorem checks never use layout or these bounds.
-                    if pin_tolerance:
-                        self.solver.add(coordinate>=z3.RealVal(str(value-pin_tolerance),ctx=self.ctx),coordinate<=z3.RealVal(str(value+pin_tolerance),ctx=self.ctx))
-                    else:self.solver.add(coordinate==z3.RealVal(str(value),ctx=self.ctx))
-        if pinned:
-            for i,value in enumerate([pinned.x,pinned.y]):
-                coordinate=self.xy[pinned.id][i]
-                if pin_tolerance:
-                    self.solver.add(coordinate>=z3.RealVal(str(value-pin_tolerance),ctx=self.ctx),coordinate<=z3.RealVal(str(value+pin_tolerance),ctx=self.ctx))
-                else:self.solver.add(coordinate==z3.RealVal(str(value),ctx=self.ctx))
-        # Retain the exact current layout whenever it satisfies the new conditions.
-        # Browser coordinates are floating point. Locking EVERY displayed decimal
-        # exactly can make a midpoint miss its equation by 1e-15 and send the
-        # solver to an unrelated layout. Try small neighbourhoods before releasing
-        # anchors. These bounds affect display placement only, never theorem checks.
-        base_ids=set(self.problem.nondegenerate.triangles[0][1:] if self.problem.nondegenerate.triangles else [p.id for p in self.problem.points[1:3]])
-        groups=[(list(self.problem.points),0),
-                *[(list(self.problem.points),radius) for radius in [0.00001,0.01,0.25,1,4]],
-                ([p for p in self.problem.points if p.id in base_ids],0),([],0)]
-        if entire_placement:
-            # Every coordinate already has its submitted bound.
-            groups=[([],0)]
-        for group,radius in groups:
-            # Removing a condition should retain a valid drawing. Only build a
-            # different angle model when the current display cannot be retained.
-            if angle_fallback and radius>=.01:return self.angle_layout()
-            self.solver.push()
-            for p in group:
-                if pinned and p.id==pinned.id:continue
-                for i,value in enumerate([p.x,p.y]):
-                    coordinate=self.xy[p.id][i]
-                    if radius:
-                        self.solver.add(coordinate>=z3.RealVal(str(value-radius),ctx=self.ctx),coordinate<=z3.RealVal(str(value+radius),ctx=self.ctx))
-                    else:self.solver.add(coordinate==z3.RealVal(str(value),ctx=self.ctx))
-            check=self.solver.check()
-            if check==z3.sat:
-                model=self.solver.model()
-                try:
-                    coords=self.coordinates(model)
-                    points=[{"id":k,"x":float(Fraction(v[0])),"y":float(Fraction(v[1])),"fixed":next(p.fixed for p in self.problem.points if p.id==k)} for k,v in coords.items()]
-                    self.solver.pop()
-                    return {"status":"sat","points":points,"exactCoordinates":coords}
-                except ValueError:
-                    # Approximation is acceptable for display, never for a certified counterexample.
-                    points=[]
-                    for k,xy in self.xy.items():
-                        vals=[model.eval(v,model_completion=True) for v in xy]
-                        def number(v):
-                            if z3.is_rational_value(v): return float(Fraction(v.numerator_as_long(),v.denominator_as_long()))
-                            return float(v.as_decimal(12).rstrip('?'))
-                        points.append({"id":k,"x":number(vals[0]),"y":number(vals[1]),"fixed":next(p.fixed for p in self.problem.points if p.id==k)})
-                    self.solver.pop()
-                    return {"status":"sat","points":points,"approximateDisplay":True}
-            # pop() clears Z3's reason_unknown on this solver. Capture the
-            # diagnostic first; internal status words are never UI messages.
-            reason=self.solver.reason_unknown() if check==z3.unknown else ''
-            self.solver.pop()
-            if check==z3.unknown:
-                if angle_shape:
-                    fallback=self.angle_layout(pinned,fixed_points,pin_tolerance)
-                    if fallback['status']=='sat':return fallback
-                return {"status":"unknown","message":"本次图形计算未完成，不能据此判断条件矛盾。请稍后重试。","solverReason":reason}
-        return {"status":"unsat","message":"当前条件无法同时满足，或拖动位置不符合保留条件"}
+    def real(self, value):
+        return z3.RealVal(str(value),ctx=self.ctx)
 
-    def angle_layout(self,pinned=None,fixed_points=(),pin_tolerance=0,*,follow_placement=False):
-        """Solve in a coordinate frame, then move the display back to its frame.
+    def placement_bounds(self, xy, points, tolerance):
+        radius=self.real(tolerance)
+        for point in points:
+            for coordinate,value in zip(xy[point.id],(point.x,point.y)):
+                center=self.real(value)
+                if tolerance:
+                    yield z3.And(coordinate>=center-radius,coordinate<=center+radius)
+                else:
+                    yield coordinate==center
 
-        Translation/rotation and, for non-metric problems, uniform scale preserve
-        all relations. Screen coordinates are never promoted to premises.
-        """
-        import math
+    def display_points(self, xy):
         from .angles import display_number
+        return [{'id':p.id,'x':display_number(xy[p.id][0]),'y':display_number(xy[p.id][1]),'fixed':p.fixed}
+                for p in self.problem.points]
+
+    def check_placement(self, points=(), tolerance=0):
+        self.solver.push()
+        try:
+            self.solver.add(*self.placement_bounds(self.xy,points,tolerance))
+            status=self.solver.check()
+            if status==z3.unknown:
+                return {'status':'unknown','solverReason':self.solver.reason_unknown(),
+                        'message':'本次图形计算未完成，不能据此判断条件矛盾。请稍后重试。'}
+            if status==z3.unsat:
+                return {'status':'unsat','message':'当前条件无法同时满足，或拖动位置不符合保留条件'}
+            model=self.solver.model()
+            xy={name:[model.eval(v,model_completion=True) for v in point] for name,point in self.xy.items()}
+            result={'status':'sat','points':self.display_points(xy)}
+            try:
+                result['exactCoordinates']=self.coordinates(model)
+            except ValueError:
+                result['approximateDisplay']=True
+            return result
+        finally:
+            self.solver.pop()
+
+    def layout(self,pinned=None,fixed_points=(),pin_tolerance=0):
+        points=self.problem.points
+        fixed_ids=set(fixed_points)
+        anchors=[p for p in points if p.id in fixed_ids]
+        if pinned:
+            anchors.append(pinned)
+        entire_placement={p.id for p in points}=={p.id for p in anchors}
+        active=[r for r in self.problem.conditions if r.enabled]
+        angle_shape=not self.normalized and any(r.kind=='fixed_angle' for r in active)
+        if angle_shape and entire_placement and pin_tolerance:
+            witness=self.angle_layout(active,anchors,pin_tolerance,follow_placement=True)
+            if witness:
+                return witness
+
+        self.solver.push()
+        try:
+            self.solver.add(*self.placement_bounds(self.xy,anchors,pin_tolerance))
+            # Drawing preferences are temporary restrictions on the hard bounds.
+            # A timeout in a small neighbourhood says nothing about a broader one.
+            self.solver.set(timeout=min(self.timeout,300))
+            if entire_placement and angle_shape:
+                result=self.check_placement()
+                if result['status']!='unknown':
+                    return result
+            if not entire_placement:
+                nearby=[p for p in points if p.id not in {a.id for a in anchors}]
+                for radius in (0,0.00001):
+                    result=self.check_placement(nearby,radius)
+                    if result['status']=='sat':
+                        return result
+            if angle_shape:
+                witness=self.angle_layout(active,anchors,pin_tolerance)
+                if witness:
+                    return witness
+            if not entire_placement:
+                for radius in (0.01,0.25,1,4):
+                    result=self.check_placement(nearby,radius)
+                    if result['status']=='sat':
+                        return result
+                base_ids=self.problem.nondegenerate.triangles[0][1:] if self.problem.nondegenerate.triangles else [p.id for p in points[1:3]]
+                result=self.check_placement([p for p in nearby if p.id in base_ids])
+                if result['status']=='sat':
+                    return result
+            self.solver.set(timeout=self.timeout)
+            return self.check_placement()
+        finally:
+            self.solver.pop()
+            self.solver.set(timeout=self.timeout)
+
+    def angle_layout(self, active, anchors, tolerance, *, follow_placement=False):
+        """Find an exact shape first, then fit it to the hard layout constraints."""
         from .angle_construction import exact_angle_models
-        constructed=exact_angle_models(self.problem,follow_placement=follow_placement)
-        if follow_placement and (not constructed or not constructed['models']):return None
+        absolute=[r for r in active if r.kind in ('fixed_point','fixed_length')]
+        positions={p.id:p for p in [*self.problem.points,*anchors]}
+        shape=self.problem.model_copy(update={
+            'conditions':[r for r in active if r.kind not in ('fixed_point','fixed_length')],
+            'points':list(positions.values()),
+        })
+        constructed=exact_angle_models(shape,follow_placement=follow_placement,layout=True)
         if constructed is not None:
-            if not constructed['models']:return {'status':'unsat','message':'这些条件不能同时成立，请核对角度和点的位置。'}
-            xy={name:[display_number(v) for v in point] for name,point in constructed['models'][0].items()}
-            b,c=constructed['seed']
+            models=constructed['models']
+            seed=constructed['seed']
+        elif follow_placement:
+            return None
         else:
-            system=ConstraintSystem(self.problem)
-            status=system.solver.check()
-            if status==z3.unsat:return {'status':'unsat','message':'这些条件不能同时成立，请核对角度和点的位置。'}
-            if status!=z3.sat:return {'status':'unknown','message':'图形计算超时，请核对条件后重试。'}
+            system=ConstraintSystem(shape,timeout=self.timeout,layout_frame=True)
+            if system.solver.check()!=z3.sat:
+                return None
             model=system.solver.model()
-            xy={name:[display_number(model.eval(v,model_completion=True)) for v in point] for name,point in system.xy.items()}
-            b,c=self.problem.nondegenerate.triangles[0][1:] if self.problem.nondegenerate.triangles else [p.id for p in self.problem.points[:2]]
-        old={p.id:(p.x,p.y) for p in self.problem.points}
-        source=complex(*xy[c])-complex(*xy[b]);target=complex(*old[c])-complex(*old[b])
-        ratio=target/source if abs(source)>1e-12 and abs(target)>1e-12 else 1+0j
-        metric=any(r.enabled and r.kind=='fixed_length' for r in self.problem.conditions) or self.problem.goal.kind=='minimize'
-        if metric:ratio/=abs(ratio)
-        offset=complex(*old[b])-ratio*complex(*xy[b])
-        points=[]
-        for point in self.problem.points:
-            value=ratio*complex(*xy[point.id])+offset
-            if not all(math.isfinite(v) and abs(v)<=10000 for v in [value.real,value.imag]):return {'status':'unknown','message':'图形坐标超出可显示范围。'}
-            points.append({'id':point.id,'x':value.real,'y':value.imag,'fixed':point.fixed})
-        # A normalized display fallback may not move a user's drag or anchors.
-        # The similarity preserves every original condition; coordinate
-        # closeness is used only for this display placement, never for proofs.
-        expected=[p for p in self.problem.points if p.id in fixed_points]
-        if pinned:expected.append(pinned)
-        by_id={p['id']:p for p in points}
-        tolerance=pin_tolerance or 1e-10
-        if any(math.hypot(by_id[p.id]['x']-p.x,by_id[p.id]['y']-p.y)>tolerance for p in expected):
-            return {'status':'unknown','message':'本次未能在保留拖动位置的同时完成图形计算，已保留上一个有效位置。'}
-        return {'status':'sat','points':points,'approximateDisplay':True}
+            models=[{name:[model.eval(v,model_completion=True) for v in point] for name,point in system.xy.items()}]
+            seed=system.frame
+
+        orientations=(1,) if any(r.kind=='on_arc' for r in active) else (1,-1)
+        for model in models:
+            for orientation in orientations:
+                xy=self.fit_angle_model(model,seed,positions,absolute,orientation)
+                if xy is None:
+                    continue
+                if all(z3.is_true(z3.simplify(bound)) for bound in self.placement_bounds(xy,anchors,tolerance)):
+                    return {'status':'sat','points':self.display_points(xy),'approximateDisplay':True}
+        return None
+
+    def fit_angle_model(self, model, seed, positions, absolute, orientation):
+        # A nonzero similarity preserves the shape predicates. Reflections
+        # are only tried when there is no directed arc among the premises.
+        simplify=z3.simplify
+        def delta(a,b):
+            return tuple(simplify(x-y) for x,y in zip(a,b))
+        def nonzero(vector):
+            return any(not z3.is_true(simplify(v==0)) for v in vector)
+
+        model={name:(x.translate(self.ctx),orientation*y.translate(self.ctx)) for name,(x,y) in model.items()}
+        fixed={r.args[0]:tuple(map(self.real,r.coordinates)) for r in absolute if r.kind=='fixed_point'}
+        target={**{name:(self.real(p.x),self.real(p.y)) for name,p in positions.items()},**fixed}
+        start=next(iter(fixed),seed[0])
+        for end in dict.fromkeys([*fixed,*seed,*model]):
+            u=delta(model[end],model[start])
+            v=delta(target[end],target[start])
+            if nonzero(u) and nonzero(v):
+                break
+        else:
+            return None
+
+        length_squared=simplify(self.dot(u,u))
+        real=simplify(self.dot(u,v)/length_squared)
+        imaginary=simplify(self.cross(u,v)/length_squared)
+        metric=next((r for r in absolute if r.kind=='fixed_length' and r.value>0),None)
+        if metric and end not in fixed:
+            edge=delta(model[metric.args[0]],model[metric.args[1]])
+            if not nonzero(edge):
+                return None
+            # Keep the direction from the sketch but set scale from the given length.
+            placed_length=z3.Sqrt(self.dot(v,v)*self.dot(edge,edge)/length_squared)
+            factor=simplify(self.real(metric.value)/placed_length)
+            real,imaginary=simplify(real*factor),simplify(imaginary*factor)
+
+        xy={}
+        tx,ty=target[start]
+        for name,point in model.items():
+            x,y=delta(point,model[start])
+            xy[name]=(simplify(tx+real*x-imaginary*y),simplify(ty+imaginary*x+real*y))
+        if any(not z3.is_true(simplify(z3.And(v>=-10000,v<=10000))) for point in xy.values() for v in point):
+            return None
+        for relation in absolute:
+            substitutions=[(variable,value) for name in set(relation.args) for variable,value in zip(self.xy[name],xy[name])]
+            if not z3.is_true(simplify(z3.substitute(self.encode(relation),*substitutions))):
+                return None
+        return xy
 
     def analyze(self):
         if self.problem.goal.kind=='angle_value':
