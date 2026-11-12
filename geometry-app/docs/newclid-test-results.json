@@ -1,0 +1,354 @@
+[
+  {
+    "case": "isosceles",
+    "status": "found",
+    "id": "newclid",
+    "title": "Newclid 搜索证明",
+    "engine": "Newclid 3.0.1",
+    "steps": [
+      {
+        "id": "nc-0",
+        "statement": "▲ABD ≡ ▲ACD",
+        "rule": "SSS Congruence of triangles (Reverse)",
+        "premises": [
+          "nc-C0",
+          "nc-T0",
+          "nc-C1",
+          "nc-N0",
+          "nc-N1",
+          "nc-N2",
+          "nc-N3",
+          "nc-N4",
+          "nc-N5",
+          "nc-N6"
+        ]
+      },
+      {
+        "id": "nc-1",
+        "statement": "▲ABD ≅ ▲ACD",
+        "rule": "Properties of congruent triangles (Reverse)",
+        "premises": [
+          "nc-0"
+        ]
+      },
+      {
+        "id": "nc-2",
+        "statement": "∠(AB,AD) = ∠(AD,AC)",
+        "rule": "Properties of similar triangles (Reverse)",
+        "premises": [
+          "nc-N0",
+          "nc-N1",
+          "nc-N2",
+          "nc-N3",
+          "nc-N4",
+          "nc-1"
+        ]
+      }
+    ],
+    "assumptionNodes": [
+      {
+        "id": "nc-C0",
+        "statement": "AC = AB",
+        "premises": [
+          "equal-sides"
+        ]
+      },
+      {
+        "id": "nc-C1",
+        "statement": "CD = BD",
+        "premises": [
+          "midpoint"
+        ]
+      },
+      {
+        "id": "nc-T0",
+        "statement": "AD = AD",
+        "premises": []
+      },
+      {
+        "id": "nc-N0",
+        "statement": "A ≠ B",
+        "premises": [
+          "domain"
+        ]
+      },
+      {
+        "id": "nc-N1",
+        "statement": "A ≠ C",
+        "premises": [
+          "domain"
+        ]
+      },
+      {
+        "id": "nc-N2",
+        "statement": "A ≠ D",
+        "premises": [
+          "domain"
+        ]
+      },
+      {
+        "id": "nc-N3",
+        "statement": "B ≠ D",
+        "premises": [
+          "domain"
+        ]
+      },
+      {
+        "id": "nc-N4",
+        "statement": "C ≠ D",
+        "premises": [
+          "domain"
+        ]
+      },
+      {
+        "id": "nc-N5",
+        "statement": "A, B, D are not collinear",
+        "premises": [
+          "domain",
+          "midpoint"
+        ]
+      },
+      {
+        "id": "nc-N6",
+        "statement": "▲ABD has the same orientation as ▲ADC",
+        "premises": [
+          "domain",
+          "midpoint"
+        ]
+      }
+    ],
+    "numericalChecks": [
+      {
+        "id": "nc-N0",
+        "type": "diff",
+        "args": [
+          "a",
+          "b"
+        ],
+        "statement": "A ≠ B"
+      },
+      {
+        "id": "nc-N1",
+        "type": "diff",
+        "args": [
+          "a",
+          "c"
+        ],
+        "statement": "A ≠ C"
+      },
+      {
+        "id": "nc-N2",
+        "type": "diff",
+        "args": [
+          "a",
+          "d"
+        ],
+        "statement": "A ≠ D"
+      },
+      {
+        "id": "nc-N3",
+        "type": "diff",
+        "args": [
+          "b",
+          "d"
+        ],
+        "statement": "B ≠ D"
+      },
+      {
+        "id": "nc-N4",
+        "type": "diff",
+        "args": [
+          "c",
+          "d"
+        ],
+        "statement": "C ≠ D"
+      },
+      {
+        "id": "nc-N5",
+        "type": "ncoll",
+        "args": [
+          "a",
+          "b",
+          "d"
+        ],
+        "statement": "A, B, D are not collinear"
+      },
+      {
+        "id": "nc-N6",
+        "type": "sameclock",
+        "args": [
+          "a",
+          "b",
+          "d",
+          "a",
+          "d",
+          "c"
+        ],
+        "statement": "▲ABD has the same orientation as ▲ADC"
+      }
+    ],
+    "raw": "# Problem setup:\n\n## Points\n\n- A(0.0000, 3.5000)\n- B(-3.0000, -1.5000)\n- C(3.0000, -1.5000)\n- D(0.0000, -1.5000)\n\n## Assumptions:\n\n[C0] : AC = AB\n[C1] : CD = BD\n\n## Numerical checks\n\n[N0] : A ≠ B\n[N1] : A ≠ C\n[N2] : A ≠ D\n[N3] : B ≠ D\n[N4] : C ≠ D\n[N5] : A, B, D are not collinear\n[N6] : ▲ABD has the same orientation as ▲ADC\n\n\n# Goals\n\n∠(AB,AD) = ∠(AD,AC) : Proved [2]\n\n\n# Proof:\n\n000. | AC = AB [C0], AD = AD [T0], CD = BD [C1], A ≠ B [N0], A ≠ C [N1], A ≠ D [N2], B ≠ D [N3], C ≠ D [N4], A, B, D are not collinear [N5], ▲ABD has the same orientation as ▲ADC [N6] =(r65 SSS Congruence of triangles (Reverse))> ▲ABD ≡ ▲ACD [0]\n001. | ▲ABD ≡ ▲ACD [0] =(r78 Properties of congruent triangles (Reverse))> ▲ABD ≅ ▲ACD [1]\n002. | A ≠ B [N0], A ≠ C [N1], A ≠ D [N2], B ≠ D [N3], C ≠ D [N4], ▲ABD ≅ ▲ACD [1] =(r53 Properties of similar triangles (Reverse))> ∠(AB,AD) = ∠(AD,AC) [2]\n\n\n# Appendix: AR deductions:\n\nEnd of proof.",
+    "input": "Built the problem 等腰三角形 with assumptions:\ncoll b c d\ncoll b c d\ncong a c a b\ncong c d b d\ndiff a b\ndiff a c\ndiff a d\ndiff b c\ndiff b d\ndiff c d\nmidp d b c\nncoll a b c\nperp a d b c\n\nand goals:\neqangle a b a d a d a c\n\nUsing points:\na (0.0, 3.5)\nb (-3.0, -1.5)\nc (3.0, -1.5)\nd (0.0, -1.5)\n",
+    "limitations": [
+      "内部点条件的共线推论供 Newclid 使用；严格内部性由 Z3 完整编码并独立核验。",
+      "Newclid 3.0.1 使用已记录的兼容适配：展开中点与互异定义，注册公共边自反性，补足三角形谓词匹配；使用官方未停用的演绎规则子集，未启用当前存在运行及依赖回溯问题的 AR 模块。未修改上游源码。"
+    ],
+    "assumptionIds": [
+      "equal-sides",
+      "midpoint"
+    ]
+  },
+  {
+    "case": "midline",
+    "status": "found",
+    "id": "newclid",
+    "title": "Newclid 搜索证明",
+    "engine": "Newclid 3.0.1",
+    "steps": [
+      {
+        "id": "nc-0",
+        "statement": "BC ∥ DE",
+        "rule": "Base of half triangle",
+        "premises": [
+          "nc-C0",
+          "nc-C1"
+        ]
+      }
+    ],
+    "assumptionNodes": [
+      {
+        "id": "nc-C0",
+        "statement": "D is the midpoint of AB",
+        "premises": [
+          "d-mid"
+        ]
+      },
+      {
+        "id": "nc-C1",
+        "statement": "E is the midpoint of AC",
+        "premises": [
+          "e-mid"
+        ]
+      }
+    ],
+    "numericalChecks": [],
+    "raw": "# Problem setup:\n\n## Points\n\n- A(0.0000, 3.5000)\n- B(-3.0000, -1.5000)\n- C(3.0000, -1.5000)\n- D(-1.5000, 1.0000)\n- E(1.5000, 1.0000)\n\n## Assumptions:\n\n[C0] : D is the midpoint of AB\n[C1] : E is the midpoint of AC\n\n\n# Goals\n\nBC ∥ DE : Proved [0]\n\n\n# Proof:\n\n000. | D is the midpoint of AB [C0], E is the midpoint of AC [C1] =(r06 Base of half triangle)> BC ∥ DE [0]\n\n\n# Appendix: AR deductions:\n\nEnd of proof.",
+    "input": "Built the problem 三角形中位线 with assumptions:\ncoll a b d\ncoll a b d\ncoll a c e\ncoll a c e\ncong a d b d\ncong a e c e\ndiff a b\ndiff a c\ndiff a d\ndiff a e\ndiff b c\ndiff b d\ndiff b e\ndiff c d\ndiff c e\ndiff d e\nmidp d a b\nmidp e a c\nncoll a b c\n\nand goals:\npara b c d e\n\nUsing points:\na (0.0, 3.5)\nb (-3.0, -1.5)\nc (3.0, -1.5)\nd (-1.5, 1.0)\ne (1.5, 1.0)\n",
+    "limitations": [
+      "内部点条件的共线推论供 Newclid 使用；严格内部性由 Z3 完整编码并独立核验。",
+      "Newclid 3.0.1 使用已记录的兼容适配：展开中点与互异定义，注册公共边自反性，补足三角形谓词匹配；使用官方未停用的演绎规则子集，未启用当前存在运行及依赖回溯问题的 AR 模块。未修改上游源码。"
+    ],
+    "assumptionIds": [
+      "d-mid",
+      "e-mid"
+    ]
+  },
+  {
+    "case": "bisector",
+    "status": "found",
+    "id": "newclid",
+    "title": "Newclid 搜索证明",
+    "engine": "Newclid 3.0.1",
+    "steps": [
+      {
+        "id": "nc-0",
+        "statement": "BP = AP",
+        "rule": "Bisector construction",
+        "premises": [
+          "nc-C0",
+          "nc-C1"
+        ]
+      }
+    ],
+    "assumptionNodes": [
+      {
+        "id": "nc-C0",
+        "statement": "M is the midpoint of AB",
+        "premises": [
+          "m-mid"
+        ]
+      },
+      {
+        "id": "nc-C1",
+        "statement": "AB ⟂ MP",
+        "premises": [
+          "p-perp"
+        ]
+      }
+    ],
+    "numericalChecks": [],
+    "raw": "# Problem setup:\n\n## Points\n\n- A(-3.0000, -1.0000)\n- B(3.0000, -1.0000)\n- M(0.0000, -1.0000)\n- P(0.0000, 3.0000)\n\n## Assumptions:\n\n[C0] : M is the midpoint of AB\n[C1] : AB ⟂ MP\n\n\n# Goals\n\nBP = AP : Proved [0]\n\n\n# Proof:\n\n000. | M is the midpoint of AB [C0], AB ⟂ MP [C1] =(r22 Bisector construction)> BP = AP [0]\n\n\n# Appendix: AR deductions:\n\nEnd of proof.",
+    "input": "Built the problem 垂直平分线 with assumptions:\ncoll a b m\ncoll a b m\ncong b m a m\ndiff a b\ndiff a m\ndiff a p\ndiff b m\ndiff b p\ndiff m p\nmidp m a b\nncoll a b p\nperp a b m p\n\nand goals:\ncong b p a p\n\nUsing points:\na (-3.0, -1.0)\nb (3.0, -1.0)\nm (0.0, -1.0)\np (0.0, 3.0)\n",
+    "limitations": [
+      "内部点条件的共线推论供 Newclid 使用；严格内部性由 Z3 完整编码并独立核验。",
+      "Newclid 3.0.1 使用已记录的兼容适配：展开中点与互异定义，注册公共边自反性，补足三角形谓词匹配；使用官方未停用的演绎规则子集，未启用当前存在运行及依赖回溯问题的 AR 模块。未修改上游源码。"
+    ],
+    "assumptionIds": [
+      "m-mid",
+      "p-perp"
+    ]
+  },
+  {
+    "case": "parallelogram",
+    "status": "not_found",
+    "message": "在当前演绎规则子集内未找到证明；结论另由精确约束核验。",
+    "engine": "Newclid 3.0.1",
+    "steps": [],
+    "assumptionNodes": [],
+    "input": "Built the problem 平行四边形的对边 with assumptions:\ndiff a b\ndiff a c\ndiff a d\ndiff b c\ndiff b d\ndiff c d\nncoll a b c\npara a b c d\npara a d b c\n\nand goals:\ncong a b c d\n\nUsing points:\na (-2.0, -1.5)\nb (2.0, -1.5)\nc (3.0, 2.0)\nd (-1.0, 2.0)\n"
+  },
+  {
+    "case": "base-angles",
+    "status": "found",
+    "id": "newclid",
+    "title": "Newclid 搜索证明",
+    "engine": "Newclid 3.0.1",
+    "steps": [
+      {
+        "id": "nc-0",
+        "statement": "∠(AB,BC) = ∠(BC,AC)",
+        "rule": "Isosceles triangle equal angles",
+        "premises": [
+          "nc-C0",
+          "nc-N0"
+        ]
+      }
+    ],
+    "assumptionNodes": [
+      {
+        "id": "nc-C0",
+        "statement": "AB = AC",
+        "premises": [
+          "equal-sides"
+        ]
+      },
+      {
+        "id": "nc-N0",
+        "statement": "A, B, C are not collinear",
+        "premises": [
+          "domain"
+        ]
+      }
+    ],
+    "numericalChecks": [
+      {
+        "id": "nc-N0",
+        "type": "ncoll",
+        "args": [
+          "a",
+          "b",
+          "c"
+        ],
+        "statement": "A, B, C are not collinear"
+      }
+    ],
+    "raw": "# Problem setup:\n\n## Points\n\n- A(0.0000, 3.5000)\n- B(-3.0000, -1.5000)\n- C(3.0000, -1.5000)\n\n## Assumptions:\n\n[C0] : AB = AC\n\n## Numerical checks\n\n[N0] : A, B, C are not collinear\n\n\n# Goals\n\n∠(AB,BC) = ∠(BC,AC) : Proved [0]\n\n\n# Proof:\n\n000. | AB = AC [C0], A, B, C are not collinear [N0] =(r13 Isosceles triangle equal angles)> ∠(AB,BC) = ∠(BC,AC) [0]\n\n\n# Appendix: AR deductions:\n\nEnd of proof.",
+    "input": "Built the problem 等腰三角形的底角 with assumptions:\ncong a b a c\ndiff a b\ndiff a c\ndiff b c\nncoll a b c\n\nand goals:\neqangle a b b c b c a c\n\nUsing points:\na (0.0, 3.5)\nb (-3.0, -1.5)\nc (3.0, -1.5)\n",
+    "limitations": [
+      "Newclid 3.0.1 使用已记录的兼容适配：展开中点与互异定义，注册公共边自反性，补足三角形谓词匹配；使用官方未停用的演绎规则子集，未启用当前存在运行及依赖回溯问题的 AR 模块。未修改上游源码。"
+    ],
+    "assumptionIds": [
+      "equal-sides"
+    ]
+  }
+]

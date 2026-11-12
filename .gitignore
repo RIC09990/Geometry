@@ -1,0 +1,57 @@
+# Credentials and local settings
+.env*
+!.env.example
+.dev.vars*
+!.dev.vars.example
+密钥.txt
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Installed dependencies and toolchains
+node_modules/
+.venv/
+.python/
+.tools/
+.uv-cache/
+
+# Build outputs, caches, and local app state
+.next/
+.vinext/
+.wrangler/
+.sites-runtime/
+.local/
+dist/
+coverage/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.tsbuildinfo
+*.log
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+/geometry-app/output/
+/geometry-app/tmp/
+/geometry-app/vendor/nicegeo/_build/
+/geometry-app/vendor/nicegeo/ide/*.vsix
+/geometry-app/docs/screenshots/ai-key-settings.png
+
+# Original test inputs and raw verification captures
+/批改示范.jpg
+/新建题[123].*
+/geometry-app/screenshots/
+/geometry-app/docs/test-results.xml
+/geometry-app/docs/screenshots/ai-real-answers-*.jpg
+/geometry-app/docs/screenshots/ai-weather-search-*.jpg
+/geometry-app/docs/screenshots/apollonius-regression-*.jpg
+/geometry-app/docs/screenshots/circle-drag-regression-*.jpg
+/geometry-app/docs/screenshots/deepseek-flash-max-settings-*.jpg
+*.har
+
+# OS metadata
+.DS_Store
+Thumbs.db
+Desktop.ini

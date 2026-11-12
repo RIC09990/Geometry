@@ -1,0 +1,12 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+const root = process.cwd();
+await fs.mkdir('.tools', {recursive:true});
+const get = async url => {const r=await fetch(url,{headers:{'User-Agent':'Geometry-development'}});if(!r.ok) throw new Error(`${r.status} ${url}`);return r};
+const releases=await (await get('https://pypi.org/pypi/uv/json')).json();
+const asset=releases.urls.find(a=>a.filename.endsWith('win_amd64.whl'));
+await fs.writeFile('.tools/uv.zip',new Uint8Array(await (await get(asset.url)).arrayBuffer()));
+console.log(`Downloaded uv ${releases.info.version} into project .tools`);
+const packages=['newclid','networkx','z3-solver','sympy'];
+const infos=await Promise.all(packages.map(async n=>{const d=await (await get(`https://pypi.org/pypi/${n}/json`)).json();return {name:n,version:d.info.version,python:d.info.requires_python,license:d.info.license,urls:d.info.project_urls}}));
+await fs.mkdir('docs',{recursive:true});await fs.writeFile('docs/package-research.json',JSON.stringify(infos,null,2));console.log(infos.map(d=>({name:d.name,version:d.version,python:d.python})));

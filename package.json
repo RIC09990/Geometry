@@ -1,0 +1,7 @@
+{
+  "name": "geometry-launcher",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix geometry-app run dev"
+  }
+}

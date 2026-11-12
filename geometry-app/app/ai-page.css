@@ -1,0 +1,64 @@
+/* The approved AI design is isolated from the other three page themes. */
+.app.theme-ai{color:#242427;background:#f2f2f4;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+.app.theme-ai .page-background{background:radial-gradient(ellipse at 70% 38%,#fff7,transparent 64%),linear-gradient(125deg,#f0f0f3,#f6f6f7 52%,#efeff2)}
+.app.theme-ai .page-background:after{content:"";position:absolute;inset:0;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23n)' d='M0 0h160v160H0z'/%3E%3C/svg%3E")}
+.app.theme-ai .app-frame{background:none}
+.app.theme-ai .topbar{background:transparent;border-bottom:1px solid #d5d5dc;color:#252528}
+.app.theme-ai .brand{font-family:inherit;font-weight:400;font-size:31px;letter-spacing:3px}
+.app.theme-ai .header-note{visibility:hidden}
+.app.theme-ai .sidebar{background:transparent;border-right-color:#d5d5dc;backdrop-filter:none}
+.app.theme-ai .sidebar nav.sliding-navigation a{color:#252528}
+.app.theme-ai .sidebar nav.sliding-navigation a.active{color:#17171a}
+.app.theme-ai .nav-arrow{display:none}
+.app.theme-ai .nav-indicator{border-radius:0;background:none;box-shadow:none;clip-path:none;backdrop-filter:none;filter:drop-shadow(0 3px 5px #4545541c)}
+.app.theme-ai .nav-indicator:before{content:"";position:absolute;inset:0;border-radius:10px;background:linear-gradient(125deg,#dfe2e95c,#eceef338 60%,#d0d5e02e);box-shadow:inset 0 1px #ffffffe0,inset 0 -1px #b4b4c04d;clip-path:polygon(0 0,calc(100% - 15px) 0,100% 50%,calc(100% - 15px) 100%,0 100%);backdrop-filter:url(#ai-glass-refraction) blur(4px) saturate(1.05);-webkit-backdrop-filter:blur(4px) saturate(1.05)}
+.app.theme-ai .nav-indicator:after{content:"";position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 58' preserveAspectRatio='none'%3E%3Cpath d='M10 1H144L159 29L144 57H10Q1 57 1 48V10Q1 1 10 1Z' fill='none' stroke='%23959dab' stroke-opacity='.38' stroke-width='1'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.ai-material-defs{position:absolute;overflow:hidden;pointer-events:none}
+.app.theme-ai .sidebar-bottom{color:#77777f}
+.app.theme-ai .page-ai{position:relative;display:block;height:calc(100dvh - 82px);min-height:560px;padding:28px 32px 38px}
+.app.theme-ai .ai-chat{position:relative;isolation:isolate;display:flex;flex-direction:column;height:100%;min-height:0;background:none;border:0;border-radius:0;box-shadow:none;overflow:visible}
+.app.theme-ai .ai-chat-toolbar{position:relative;z-index:2;display:flex;justify-content:flex-end;flex-shrink:0;height:42px}
+.app.theme-ai .ai-toolbar-actions{display:flex;align-items:center;gap:12px}
+.app.theme-ai .ai-toolbar-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:42px;padding:0 16px;border:1px solid #ffffffb3;border-radius:13px;background:linear-gradient(#ffffff38,#ffffff10);box-shadow:inset 0 1px #ffffff8c,0 2px 4px #34344708;font-size:15px;line-height:22px;white-space:nowrap;color:#28282b}
+.app.theme-ai .ai-toolbar-button svg{width:18px;height:18px;stroke-width:1.6}
+.app.theme-ai .ai-toolbar-button:disabled{opacity:.65}
+.app.theme-ai .ai-toolbar-button:hover:enabled{background:#ffffff70;box-shadow:0 3px 8px #3434470a}
+.app.theme-ai .ai-heading{position:absolute;z-index:1;top:52px;left:28px;pointer-events:none}
+.app.theme-ai .ai-heading h1{font-size:clamp(32px,4.15vw,64px);font-weight:400;line-height:1.4;letter-spacing:0;color:#27272a;margin:0}
+.app.theme-ai .ai-relief{position:absolute;z-index:-1;right:4%;top:65px;width:min(43vw,540px);height:min(55dvh,calc(100% - 190px));pointer-events:none;transition:opacity .2s}
+.app.theme-ai .has-conversation .ai-relief{opacity:.22}
+.app.theme-ai .ai-messages{position:relative;flex:1;min-height:0;max-height:none;overflow:auto;padding:28px 6px 20px;scrollbar-width:thin;scrollbar-color:#c2c2ca transparent}
+.app.theme-ai .ai-message{background:#ffffffb8;border-color:#fff9;color:#303036;box-shadow:0 2px 6px #45455404}
+.app.theme-ai .ai-user{background:#e2e2eabf;border-color:#dddde7;color:#29292f}
+.app.theme-ai .ai-message small{color:#72727c}
+.app.theme-ai .ai-message .ai-markdown{color:#303036}
+.app.theme-ai .ai-message .ai-markdown pre{background:#e8e8ee}
+.app.theme-ai .ai-compose{flex-shrink:0;position:relative;z-index:2;padding:13px 24px 14px;border:1px solid #ffffffc9;border-radius:19px;background:linear-gradient(125deg,#ffffff3b,#ffffff14);box-shadow:inset 0 1px #ffffff80,0 3px 8px #48485706}
+.app.theme-ai .ai-compose:focus-within{border-color:#b5b5c5;box-shadow:0 0 0 2px #7d7d9210}
+.app.theme-ai .ai-compose textarea{display:block;width:100%;height:54px;min-height:54px;max-height:160px;resize:vertical;padding:2px 4px 8px;border:0;border-radius:4px;background:transparent;color:#303036;font-family:inherit;font-size:15px;line-height:1.8;outline:none;box-shadow:none}
+.app.theme-ai .ai-compose textarea::placeholder{color:#66666e}
+.app.theme-ai .ai-compose textarea:focus{outline:none}
+.app.theme-ai .ai-compose-bottom{display:grid;grid-template-columns:max-content max-content 1fr max-content;align-items:center;gap:8px 23px;margin-top:8px}
+.app.theme-ai .ai-attachments{display:contents;color:#61616b}
+.app.theme-ai .ai-attachments>.text-button{grid-column:1;grid-row:1;display:flex;align-items:center;gap:10px;min-height:40px;padding:0 4px;margin:0;font-size:15px;line-height:22px;text-decoration:none;color:#303036}
+.app.theme-ai .ai-attachments>.text-button svg{width:19px;height:19px;stroke-width:1.6}
+.app.theme-ai .ai-web-toggle{position:relative;grid-column:2;grid-row:1;display:flex;align-items:center;gap:10px;height:40px;margin:0;padding:0 5px 0 24px;border-left:1px solid #d6d6df;font-size:15px;line-height:22px;color:#303036;cursor:pointer;border-radius:0}
+.app.theme-ai .ai-web-toggle input{position:absolute;opacity:0;width:100%;height:100%;inset:0;margin:0;cursor:pointer}
+.app.theme-ai .ai-web-toggle:has(input:checked){color:#414172;background:#d6d6e64d}
+.app.theme-ai .ai-web-toggle:has(input:focus-visible){outline:2px solid #76768c;outline-offset:3px}
+.app.theme-ai .ai-web-toggle svg{stroke-width:1.6}
+.app.theme-ai .ai-send{grid-column:4;grid-row:1;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:40px;min-width:104px;padding:0 18px;border:1px solid #ffffffdb;border-radius:12px;color:#303036;background:linear-gradient(#ffffff5c,#ffffff19);box-shadow:inset 0 1px #ffffff96,0 3px 5px #42425410;font-size:15px;font-weight:400;line-height:22px}
+.app.theme-ai .ai-send:hover:enabled{background:#ffffff80;transform:none}
+.app.theme-ai .ai-send:disabled{opacity:.48}
+.app.theme-ai .ai-attachments :is(.attachment-list,.attachment-error),.app.theme-ai .ai-attachments>[role=status]{grid-column:1/-1;grid-row:2;margin:0;padding:4px 0;color:#666674}
+.app.theme-ai .attachment-preview{background:#fff9;border-color:#d6d6df}
+.app.theme-ai .ai-error{flex-shrink:0;position:relative;margin:8px 0 12px;background:#f4e8e7;color:#944e49}
+.app.theme-ai :is(button,a,textarea):focus-visible{outline:2px solid #76768c;outline-offset:4px}
+.app.theme-ai .ai-key-form input{border-color:#c8c8d3}
+.app.theme-ai .modal{background:#f7f7f9;border-color:#d6d6df;color:#303036}
+.app.theme-ai .modal>header,.app.theme-ai .settings-list label{border-color:#dddde5}
+.app.theme-ai .modal .primary{background:#4a4a5d;border-color:#4a4a5d;color:white}
+.app.theme-ai .modal .secondary{background:#eeeef3;border-color:#d0d0db;color:#42424f}
+@media(max-width:1250px){.app.theme-ai .page-ai{padding:26px 26px 30px}.app.theme-ai .ai-heading{left:16px}.app.theme-ai .ai-relief{right:0;top:95px;width:44vw}}
+@media(max-width:760px){.app.theme-ai .brand{font-size:26px;letter-spacing:2px}.app.theme-ai .page-ai{height:calc(100dvh - 69px);min-height:480px;padding:20px 18px 22px}.app.theme-ai .ai-heading{left:6px;top:56px}.app.theme-ai .ai-heading h1{font-size:clamp(27px,5.5vw,40px)}.app.theme-ai .ai-relief{top:115px;right:0;width:54vw;max-height:52vh}.app.theme-ai .ai-toolbar-actions{gap:8px}.app.theme-ai .ai-toolbar-button{height:38px;padding:0 11px;gap:7px;font-size:12px;border-radius:11px}.app.theme-ai .ai-compose{padding:12px}.app.theme-ai .ai-compose textarea{font-size:13px}.app.theme-ai .ai-compose-bottom{gap:8px 10px}.app.theme-ai .ai-attachments>.text-button,.app.theme-ai .ai-web-toggle,.app.theme-ai .ai-send{font-size:12px;gap:6px}.app.theme-ai .ai-web-toggle{padding-left:12px}.app.theme-ai .ai-send{min-width:76px;padding:0 10px}.app.theme-ai .ai-message{max-width:98%}}
+@media(max-width:430px){.app.theme-ai .brand{font-size:22px;letter-spacing:1px}.app.theme-ai .page-ai{padding:16px 12px 18px}.app.theme-ai .ai-compose{padding:10px}.app.theme-ai .ai-compose-bottom{grid-template-columns:max-content max-content 1fr;gap:6px}.app.theme-ai .ai-send{grid-column:3;min-width:59px;padding:0 8px}.app.theme-ai .ai-web-toggle{padding-left:8px}.app.theme-ai .ai-attachments>.text-button svg,.app.theme-ai .ai-web-toggle svg{width:16px;height:16px}.app.theme-ai .ai-toolbar-button{font-size:11px;padding:0 8px}.app.theme-ai .ai-heading{left:2px}.app.theme-ai .ai-heading h1{font-size:26px}}

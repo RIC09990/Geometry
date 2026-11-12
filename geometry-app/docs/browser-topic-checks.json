@@ -1,0 +1,30 @@
+[
+  {
+    "actionBars": 0,
+    "ai": true,
+    "proofCollapsed": true,
+    "title": "三角形中位线",
+    "uploads": true
+  },
+  {
+    "actionBars": 0,
+    "ai": true,
+    "proofCollapsed": true,
+    "title": "垂直平分线",
+    "uploads": true
+  },
+  {
+    "actionBars": 0,
+    "ai": true,
+    "proofCollapsed": true,
+    "title": "平行四边形的对边",
+    "uploads": true
+  },
+  {
+    "actionBars": 0,
+    "ai": true,
+    "proofCollapsed": true,
+    "title": "等腰三角形的底角",
+    "uploads": true
+  }
+]

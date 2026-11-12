@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-08",
+  "bytes": 1632651455,
+  "GiB": 1.521,
+  "directories": {
+    ".local": 1494476,
+    ".next": 1318,
+    ".openai": 31,
+    ".pytest_cache": 0,
+    ".python": 130177985,
+    ".sites-runtime": 835,
+    ".tools": 45861492,
+    ".venv": 418813634,
+    ".vinext": 189,
+    ".wrangler": 45210,
+    "app": 63492,
+    "components": 65619,
+    "data": 9471,
+    "db": 592,
+    "dist": 12351561,
+    "docs": 4345077,
+    "drizzle": 61,
+    "examples": 2070,
+    "hooks": 0,
+    "lib": 56155,
+    "node_modules": 969851056,
+    "public": 3213053,
+    "scripts": 95386,
+    "server": 178025,
+    "tests": 183896,
+    "vendor": 45839468,
+    "worker": 1303
+  },
+  "removed": [
+    ".local/opam",
+    ".local/npm-cache",
+    ".uv-cache",
+    ".tools/uv.zip",
+    "unused UI packages/components",
+    "temporary video analysis dependency and fixtures"
+  ],
+  "preserved": [
+    "native NiceGeo executable and sources/licenses",
+    "Python mathematics runtime",
+    "active frontend/runtime dependencies",
+    "user records"
+  ]
+}

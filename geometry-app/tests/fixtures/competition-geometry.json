@@ -1,0 +1,2539 @@
+[
+  {
+    "name": "双圆双动点及严格内点",
+    "expectedMinimum": "25",
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-pressure-e82466b994b2",
+      "title": "双圆双动点路径",
+      "version": 1,
+      "points": [
+        {
+          "id": "C",
+          "x": -5.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "D",
+          "x": 5.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "O",
+          "x": -2.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "U",
+          "x": -1.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "V",
+          "x": 2.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "W",
+          "x": 2.0,
+          "y": 1.0,
+          "fixed": false
+        },
+        {
+          "id": "P",
+          "x": -2.0,
+          "y": 1.0,
+          "fixed": false
+        },
+        {
+          "id": "Q",
+          "x": 2.0,
+          "y": 1.0,
+          "fixed": false
+        },
+        {
+          "id": "A",
+          "x": -6.0,
+          "y": -2.0,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": 6.0,
+          "y": -2.0,
+          "fixed": false
+        },
+        {
+          "id": "H",
+          "x": 0.0,
+          "y": 5.0,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "fix-C",
+          "kind": "fixed_point",
+          "args": [
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -5.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-D",
+          "kind": "fixed_point",
+          "args": [
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            5.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-O",
+          "kind": "fixed_point",
+          "args": [
+            "O"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -2.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-U",
+          "kind": "fixed_point",
+          "args": [
+            "U"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-V",
+          "kind": "fixed_point",
+          "args": [
+            "V"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-W",
+          "kind": "fixed_point",
+          "args": [
+            "W"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            1.0
+          ]
+        },
+        {
+          "id": "fix-A",
+          "kind": "fixed_point",
+          "args": [
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -6.0,
+            -2.0
+          ]
+        },
+        {
+          "id": "fix-B",
+          "kind": "fixed_point",
+          "args": [
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            6.0,
+            -2.0
+          ]
+        },
+        {
+          "id": "fix-H",
+          "kind": "fixed_point",
+          "args": [
+            "H"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            0.0,
+            5.0
+          ]
+        },
+        {
+          "id": "circle-p",
+          "kind": "on_circle",
+          "args": [
+            "P",
+            "O",
+            "U"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "circle-q",
+          "kind": "on_circle",
+          "args": [
+            "Q",
+            "V",
+            "W"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "inside-p",
+          "kind": "inside_triangle",
+          "args": [
+            "P",
+            "A",
+            "B",
+            "H"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "inside-q",
+          "kind": "inside_triangle",
+          "args": [
+            "Q",
+            "A",
+            "B",
+            "H"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "same",
+          "kind": "same_side",
+          "args": [
+            "P",
+            "Q",
+            "A",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "minimize",
+        "args": [
+          "C",
+          "P",
+          "P",
+          "Q",
+          "Q",
+          "D"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": false,
+        "triangles": [
+          [
+            "A",
+            "B",
+            "H"
+          ]
+        ]
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  },
+  {
+    "name": "双圆圆弧含取等端点",
+    "expectedMinimum": "25",
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-pressure-534fa5e7c69c",
+      "title": "双圆双动点路径含弧端点",
+      "version": 1,
+      "points": [
+        {
+          "id": "C",
+          "x": -5.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "D",
+          "x": 5.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "O",
+          "x": -2.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "U",
+          "x": -1.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "V",
+          "x": 2.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "W",
+          "x": 2.0,
+          "y": 1.0,
+          "fixed": false
+        },
+        {
+          "id": "P",
+          "x": -2.0,
+          "y": 1.0,
+          "fixed": false
+        },
+        {
+          "id": "Q",
+          "x": 2.0,
+          "y": 1.0,
+          "fixed": false
+        },
+        {
+          "id": "A",
+          "x": -6.0,
+          "y": -2.0,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": 6.0,
+          "y": -2.0,
+          "fixed": false
+        },
+        {
+          "id": "H",
+          "x": 0.0,
+          "y": 5.0,
+          "fixed": false
+        },
+        {
+          "id": "S",
+          "x": -2.0,
+          "y": 1.0,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "fix-C",
+          "kind": "fixed_point",
+          "args": [
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -5.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-D",
+          "kind": "fixed_point",
+          "args": [
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            5.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-O",
+          "kind": "fixed_point",
+          "args": [
+            "O"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -2.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-U",
+          "kind": "fixed_point",
+          "args": [
+            "U"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-V",
+          "kind": "fixed_point",
+          "args": [
+            "V"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-W",
+          "kind": "fixed_point",
+          "args": [
+            "W"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            1.0
+          ]
+        },
+        {
+          "id": "fix-A",
+          "kind": "fixed_point",
+          "args": [
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -6.0,
+            -2.0
+          ]
+        },
+        {
+          "id": "fix-B",
+          "kind": "fixed_point",
+          "args": [
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            6.0,
+            -2.0
+          ]
+        },
+        {
+          "id": "fix-H",
+          "kind": "fixed_point",
+          "args": [
+            "H"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            0.0,
+            5.0
+          ]
+        },
+        {
+          "id": "fix-S",
+          "kind": "fixed_point",
+          "args": [
+            "S"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -2.0,
+            1.0
+          ]
+        },
+        {
+          "id": "circle-p",
+          "kind": "on_arc",
+          "args": [
+            "P",
+            "O",
+            "U",
+            "S"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "circle-q",
+          "kind": "on_circle",
+          "args": [
+            "Q",
+            "V",
+            "W"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "inside-p",
+          "kind": "inside_triangle",
+          "args": [
+            "P",
+            "A",
+            "B",
+            "H"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "inside-q",
+          "kind": "inside_triangle",
+          "args": [
+            "Q",
+            "A",
+            "B",
+            "H"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "same",
+          "kind": "same_side",
+          "args": [
+            "P",
+            "Q",
+            "A",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "minimize",
+        "args": [
+          "C",
+          "P",
+          "P",
+          "Q",
+          "Q",
+          "D"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [
+          2.5,
+          2.5,
+          2.5
+        ],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": false,
+        "triangles": [
+          [
+            "A",
+            "B",
+            "H"
+          ]
+        ]
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  },
+  {
+    "name": "六项加权中点联动",
+    "expectedMinimum": "sqrt(130)",
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-pressure-3b14a084b464",
+      "title": "圆上动点中点联动六项加权和",
+      "version": 1,
+      "points": [
+        {
+          "id": "O",
+          "x": 0.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "U",
+          "x": 3.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "A",
+          "x": -1.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": 2.0,
+          "y": 3.0,
+          "fixed": false
+        },
+        {
+          "id": "P",
+          "x": 0.0,
+          "y": 3.0,
+          "fixed": false
+        },
+        {
+          "id": "M",
+          "x": -0.5,
+          "y": 1.5,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "fix-O",
+          "kind": "fixed_point",
+          "args": [
+            "O"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-U",
+          "kind": "fixed_point",
+          "args": [
+            "U"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            3.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-A",
+          "kind": "fixed_point",
+          "args": [
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-B",
+          "kind": "fixed_point",
+          "args": [
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            3.0
+          ]
+        },
+        {
+          "id": "circle",
+          "kind": "on_circle",
+          "args": [
+            "P",
+            "O",
+            "U"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "midpoint",
+          "kind": "midpoint",
+          "args": [
+            "M",
+            "P",
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "minimize",
+        "args": [
+          "M",
+          "A",
+          "M",
+          "P",
+          "P",
+          "A",
+          "P",
+          "B",
+          "B",
+          "P",
+          "P",
+          "B"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [
+          1.0,
+          1.0,
+          2.0,
+          0.25,
+          0.5,
+          0.25
+        ],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": false,
+        "triangles": []
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  },
+  {
+    "name": "不同半径与权重的联动",
+    "expectedMinimum": "13*sqrt(5)",
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-pressure-f6407491b33f",
+      "title": "圆上动点中点联动六项加权和",
+      "version": 1,
+      "points": [
+        {
+          "id": "O",
+          "x": 0.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "U",
+          "x": 5.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "A",
+          "x": -1.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": 4.0,
+          "y": 2.0,
+          "fixed": false
+        },
+        {
+          "id": "P",
+          "x": 0.0,
+          "y": 5.0,
+          "fixed": false
+        },
+        {
+          "id": "M",
+          "x": -0.5,
+          "y": 2.5,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "fix-O",
+          "kind": "fixed_point",
+          "args": [
+            "O"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-U",
+          "kind": "fixed_point",
+          "args": [
+            "U"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            5.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-A",
+          "kind": "fixed_point",
+          "args": [
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-B",
+          "kind": "fixed_point",
+          "args": [
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            4.0,
+            2.0
+          ]
+        },
+        {
+          "id": "circle",
+          "kind": "on_circle",
+          "args": [
+            "P",
+            "O",
+            "U"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "midpoint",
+          "kind": "midpoint",
+          "args": [
+            "M",
+            "P",
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "minimize",
+        "args": [
+          "M",
+          "A",
+          "M",
+          "P",
+          "P",
+          "A",
+          "P",
+          "B",
+          "B",
+          "P",
+          "P",
+          "B"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [
+          1.0,
+          1.0,
+          4.0,
+          0.25,
+          0.5,
+          0.25
+        ],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": false,
+        "triangles": []
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  },
+  {
+    "name": "阿氏圆区域约束与中点联动",
+    "expectedMinimum": "sqrt(37)/2",
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-pressure-dea68d536cbf",
+      "title": "阿氏圆与中点联动及内外区域加权和",
+      "version": 1,
+      "points": [
+        {
+          "id": "A",
+          "x": 0.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": 3.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "D",
+          "x": 2.0,
+          "y": 3.0,
+          "fixed": false
+        },
+        {
+          "id": "P",
+          "x": 4.0,
+          "y": 2.0,
+          "fixed": false
+        },
+        {
+          "id": "M",
+          "x": 2.0,
+          "y": 1.0,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "fix-A",
+          "kind": "fixed_point",
+          "args": [
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-B",
+          "kind": "fixed_point",
+          "args": [
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            3.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-D",
+          "kind": "fixed_point",
+          "args": [
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            3.0
+          ]
+        },
+        {
+          "id": "apollonius",
+          "kind": "length_ratio",
+          "args": [
+            "P",
+            "A",
+            "P",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 2.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "midpoint",
+          "kind": "midpoint",
+          "args": [
+            "M",
+            "P",
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "outside",
+          "kind": "outside_circle",
+          "args": [
+            "P",
+            "A",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "inside",
+          "kind": "inside_circle",
+          "args": [
+            "M",
+            "A",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "side",
+          "kind": "same_side",
+          "args": [
+            "P",
+            "D",
+            "A",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "minimize",
+        "args": [
+          "M",
+          "A",
+          "M",
+          "D"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [
+          0.5,
+          1.0
+        ],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": false,
+        "triangles": [
+          [
+            "M",
+            "A",
+            "B"
+          ]
+        ]
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  },
+  {
+    "name": "双动点连续反射",
+    "expectedMinimum": "2*sqrt(41)",
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-pressure-8de8a88438d5",
+      "title": "2次反射与2动点加权折线",
+      "version": 1,
+      "points": [
+        {
+          "id": "A",
+          "x": -3.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": 9.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "E",
+          "x": 6.0,
+          "y": -2.0,
+          "fixed": false
+        },
+        {
+          "id": "F",
+          "x": 6.0,
+          "y": 9.0,
+          "fixed": false
+        },
+        {
+          "id": "C",
+          "x": 0.0,
+          "y": 3.0,
+          "fixed": false
+        },
+        {
+          "id": "D",
+          "x": 2.0,
+          "y": 5.0,
+          "fixed": false
+        },
+        {
+          "id": "P",
+          "x": 3.75,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "Q",
+          "x": 6.0,
+          "y": 1.8,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "fix-A",
+          "kind": "fixed_point",
+          "args": [
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -3.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-B",
+          "kind": "fixed_point",
+          "args": [
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            9.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-E",
+          "kind": "fixed_point",
+          "args": [
+            "E"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            6.0,
+            -2.0
+          ]
+        },
+        {
+          "id": "fix-F",
+          "kind": "fixed_point",
+          "args": [
+            "F"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            6.0,
+            9.0
+          ]
+        },
+        {
+          "id": "fix-C",
+          "kind": "fixed_point",
+          "args": [
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            0.0,
+            3.0
+          ]
+        },
+        {
+          "id": "fix-D",
+          "kind": "fixed_point",
+          "args": [
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "id": "first",
+          "kind": "on_segment",
+          "args": [
+            "P",
+            "A",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "second",
+          "kind": "on_segment",
+          "args": [
+            "Q",
+            "E",
+            "F"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "side",
+          "kind": "same_side",
+          "args": [
+            "P",
+            "Q",
+            "A",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "outside",
+          "kind": "outside_circle",
+          "args": [
+            "P",
+            "C",
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "inside",
+          "kind": "inside_circle",
+          "args": [
+            "Q",
+            "D",
+            "E"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "minimize",
+        "args": [
+          "C",
+          "P",
+          "P",
+          "Q",
+          "Q",
+          "D"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": true,
+        "triangles": [
+          [
+            "A",
+            "C",
+            "E"
+          ]
+        ]
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  },
+  {
+    "name": "不同权重的连续反射",
+    "expectedMinimum": "7*sqrt(41)/2",
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-pressure-3a5bfd1a7bdd",
+      "title": "2次反射与2动点加权折线",
+      "version": 1,
+      "points": [
+        {
+          "id": "A",
+          "x": -3.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": 9.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "E",
+          "x": 6.0,
+          "y": -2.0,
+          "fixed": false
+        },
+        {
+          "id": "F",
+          "x": 6.0,
+          "y": 9.0,
+          "fixed": false
+        },
+        {
+          "id": "C",
+          "x": 0.0,
+          "y": 3.0,
+          "fixed": false
+        },
+        {
+          "id": "D",
+          "x": 2.0,
+          "y": 5.0,
+          "fixed": false
+        },
+        {
+          "id": "P",
+          "x": 3.75,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "Q",
+          "x": 6.0,
+          "y": 1.8,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "fix-A",
+          "kind": "fixed_point",
+          "args": [
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -3.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-B",
+          "kind": "fixed_point",
+          "args": [
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            9.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-E",
+          "kind": "fixed_point",
+          "args": [
+            "E"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            6.0,
+            -2.0
+          ]
+        },
+        {
+          "id": "fix-F",
+          "kind": "fixed_point",
+          "args": [
+            "F"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            6.0,
+            9.0
+          ]
+        },
+        {
+          "id": "fix-C",
+          "kind": "fixed_point",
+          "args": [
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            0.0,
+            3.0
+          ]
+        },
+        {
+          "id": "fix-D",
+          "kind": "fixed_point",
+          "args": [
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "id": "first",
+          "kind": "on_segment",
+          "args": [
+            "P",
+            "A",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "second",
+          "kind": "on_segment",
+          "args": [
+            "Q",
+            "E",
+            "F"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "side",
+          "kind": "same_side",
+          "args": [
+            "P",
+            "Q",
+            "A",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "outside",
+          "kind": "outside_circle",
+          "args": [
+            "P",
+            "C",
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "inside",
+          "kind": "inside_circle",
+          "args": [
+            "Q",
+            "D",
+            "E"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "minimize",
+        "args": [
+          "C",
+          "P",
+          "P",
+          "Q",
+          "Q",
+          "D"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [
+          1.75,
+          1.75,
+          1.75
+        ],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": true,
+        "triangles": [
+          [
+            "A",
+            "C",
+            "E"
+          ]
+        ]
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  },
+  {
+    "name": "三动点三次反射",
+    "expectedMinimum": "5*sqrt(221)/4",
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-pressure-c09be3edd318",
+      "title": "3次反射与3动点加权折线",
+      "version": 1,
+      "points": [
+        {
+          "id": "A",
+          "x": -3.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": 9.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "E",
+          "x": 6.0,
+          "y": -2.0,
+          "fixed": false
+        },
+        {
+          "id": "F",
+          "x": 6.0,
+          "y": 9.0,
+          "fixed": false
+        },
+        {
+          "id": "C",
+          "x": 0.0,
+          "y": 2.0,
+          "fixed": false
+        },
+        {
+          "id": "D",
+          "x": 2.0,
+          "y": 5.0,
+          "fixed": false
+        },
+        {
+          "id": "P",
+          "x": 1.8181818181818181,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "Q",
+          "x": 6.0,
+          "y": 4.6,
+          "fixed": false
+        },
+        {
+          "id": "G",
+          "x": -1.0,
+          "y": 7.0,
+          "fixed": false
+        },
+        {
+          "id": "H",
+          "x": 9.0,
+          "y": 7.0,
+          "fixed": false
+        },
+        {
+          "id": "R",
+          "x": 3.8181818181818183,
+          "y": 7.0,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "fix-A",
+          "kind": "fixed_point",
+          "args": [
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -3.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-B",
+          "kind": "fixed_point",
+          "args": [
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            9.0,
+            0.0
+          ]
+        },
+        {
+          "id": "fix-E",
+          "kind": "fixed_point",
+          "args": [
+            "E"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            6.0,
+            -2.0
+          ]
+        },
+        {
+          "id": "fix-F",
+          "kind": "fixed_point",
+          "args": [
+            "F"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            6.0,
+            9.0
+          ]
+        },
+        {
+          "id": "fix-C",
+          "kind": "fixed_point",
+          "args": [
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            0.0,
+            2.0
+          ]
+        },
+        {
+          "id": "fix-D",
+          "kind": "fixed_point",
+          "args": [
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            2.0,
+            5.0
+          ]
+        },
+        {
+          "id": "fix-G",
+          "kind": "fixed_point",
+          "args": [
+            "G"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            -1.0,
+            7.0
+          ]
+        },
+        {
+          "id": "fix-H",
+          "kind": "fixed_point",
+          "args": [
+            "H"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": [
+            9.0,
+            7.0
+          ]
+        },
+        {
+          "id": "first",
+          "kind": "on_segment",
+          "args": [
+            "P",
+            "A",
+            "B"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "second",
+          "kind": "on_segment",
+          "args": [
+            "Q",
+            "E",
+            "F"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "third",
+          "kind": "on_segment",
+          "args": [
+            "R",
+            "G",
+            "H"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "minimize",
+        "args": [
+          "C",
+          "P",
+          "P",
+          "Q",
+          "Q",
+          "R",
+          "R",
+          "D"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [
+          1.25,
+          1.25,
+          1.25,
+          1.25
+        ],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": true,
+        "triangles": [
+          [
+            "A",
+            "C",
+            "E"
+          ]
+        ]
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  },
+  {
+    "name": "七点多重角度与区域约束",
+    "expectedAngle": 35,
+    "problem": {
+      "schemaVersion": 1,
+      "id": "custom-angle-grid",
+      "title": "多射线角约束",
+      "version": 1,
+      "points": [
+        {
+          "id": "A",
+          "x": 0.0,
+          "y": 5.494954838909244,
+          "fixed": false
+        },
+        {
+          "id": "B",
+          "x": -2.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "C",
+          "x": 2.0,
+          "y": 0.0,
+          "fixed": false
+        },
+        {
+          "id": "D",
+          "x": -0.7898616872693969,
+          "y": 1.015426611885745,
+          "fixed": false
+        },
+        {
+          "id": "E",
+          "x": 0.4533631938113549,
+          "y": 0.8929511763915973,
+          "fixed": false
+        },
+        {
+          "id": "F",
+          "x": 1.3054072893322788,
+          "y": 0.5828324873397122,
+          "fixed": false
+        },
+        {
+          "id": "G",
+          "x": -0.8484651896868016,
+          "y": 1.6445621440429532,
+          "fixed": false
+        }
+      ],
+      "segments": [],
+      "circles": [],
+      "conditions": [
+        {
+          "id": "a0",
+          "kind": "fixed_angle",
+          "args": [
+            "A",
+            "B",
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 30.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "a1",
+          "kind": "fixed_angle",
+          "args": [
+            "D",
+            "B",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 40.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "a2",
+          "kind": "fixed_angle",
+          "args": [
+            "B",
+            "C",
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 20.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "a3",
+          "kind": "fixed_angle",
+          "args": [
+            "D",
+            "C",
+            "A"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 50.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "inside",
+          "kind": "inside_triangle",
+          "args": [
+            "D",
+            "A",
+            "B",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "e1",
+          "kind": "fixed_angle",
+          "args": [
+            "E",
+            "B",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 20.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "e2",
+          "kind": "fixed_angle",
+          "args": [
+            "B",
+            "C",
+            "E"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 30.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "f1",
+          "kind": "fixed_angle",
+          "args": [
+            "F",
+            "B",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 10.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "f2",
+          "kind": "fixed_angle",
+          "args": [
+            "B",
+            "C",
+            "F"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 40.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "g1",
+          "kind": "fixed_angle",
+          "args": [
+            "G",
+            "B",
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 15.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "g2",
+          "kind": "fixed_angle",
+          "args": [
+            "G",
+            "C",
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": 10.0,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "insideE",
+          "kind": "inside_triangle",
+          "args": [
+            "E",
+            "A",
+            "B",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "insideF",
+          "kind": "inside_triangle",
+          "args": [
+            "F",
+            "A",
+            "B",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "insideG",
+          "kind": "inside_triangle",
+          "args": [
+            "G",
+            "A",
+            "B",
+            "C"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "branch-b",
+          "kind": "same_side",
+          "args": [
+            "G",
+            "A",
+            "B",
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        },
+        {
+          "id": "branch-c",
+          "kind": "same_side",
+          "args": [
+            "G",
+            "A",
+            "C",
+            "D"
+          ],
+          "description": "",
+          "enabled": true,
+          "toggleable": true,
+          "value": null,
+          "weights": [],
+          "orientation": "ccw",
+          "coordinates": []
+        }
+      ],
+      "goal": {
+        "id": "goal",
+        "kind": "angle_value",
+        "args": [
+          "G",
+          "B",
+          "E"
+        ],
+        "description": "",
+        "enabled": true,
+        "toggleable": true,
+        "value": null,
+        "weights": [],
+        "orientation": "ccw",
+        "coordinates": []
+      },
+      "nondegenerate": {
+        "distinct": true,
+        "triangles": [
+          [
+            "A",
+            "B",
+            "C"
+          ]
+        ]
+      },
+      "sourceText": "",
+      "constructions": []
+    }
+  }
+]

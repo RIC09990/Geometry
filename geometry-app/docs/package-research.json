@@ -1,0 +1,43 @@
+[
+  {
+    "name": "newclid",
+    "version": "3.0.1",
+    "python": ">=3.11",
+    "license": null,
+    "urls": {
+      "Homepage": "https://newclid.github.io/Newclid/",
+      "Repository": "https://github.com/Newclid/Newclid.git"
+    }
+  },
+  {
+    "name": "networkx",
+    "version": "3.7",
+    "python": "!=3.14.1,>=3.12",
+    "license": null,
+    "urls": {
+      "Bug Tracker": "https://github.com/networkx/networkx/issues",
+      "Documentation": "https://networkx.org/documentation/stable/",
+      "Homepage": "https://networkx.org/",
+      "Source Code": "https://github.com/networkx/networkx"
+    }
+  },
+  {
+    "name": "z3-solver",
+    "version": "5.3.3.0",
+    "python": null,
+    "license": "MIT License",
+    "urls": {
+      "Homepage": "https://github.com/Z3Prover/z3"
+    }
+  },
+  {
+    "name": "sympy",
+    "version": "1.14.0",
+    "python": ">=3.9",
+    "license": "BSD",
+    "urls": {
+      "Homepage": "https://sympy.org",
+      "Source": "https://github.com/sympy/sympy"
+    }
+  }
+]

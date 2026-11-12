@@ -1,0 +1,154 @@
+{
+  "before": {
+    "ready": true,
+    "frontend": {
+      "ready": true,
+      "state": "running",
+      "port": 3101,
+      "pid": 24032,
+      "httpStatus": 200,
+      "lastCheckedAt": "2026-11-09T07:47:56.046Z",
+      "lastError": null,
+      "restarts": 0,
+      "retryAt": null
+    },
+    "api": {
+      "ready": true,
+      "state": "running",
+      "port": 8001,
+      "pid": 21760,
+      "httpStatus": 200,
+      "lastCheckedAt": "2026-11-09T07:47:56.030Z",
+      "lastError": null,
+      "restarts": 1,
+      "retryAt": null
+    }
+  },
+  "rows": [
+    {
+      "time": "2026-11-09T07:47:56.078Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:47:56.528Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:47:57.125Z",
+      "page": 200,
+      "api": 503
+    },
+    {
+      "time": "2026-11-09T07:47:57.553Z",
+      "page": 200,
+      "api": 503
+    },
+    {
+      "time": "2026-11-09T07:47:57.988Z",
+      "page": 200,
+      "api": 503
+    },
+    {
+      "time": "2026-11-09T07:47:58.423Z",
+      "page": 200,
+      "api": 503
+    },
+    {
+      "time": "2026-11-09T07:47:58.863Z",
+      "page": 200,
+      "api": 503
+    },
+    {
+      "time": "2026-11-09T07:47:59.312Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:47:59.750Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:00.181Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:00.609Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:01.045Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:01.486Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:01.920Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:02.357Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:02.787Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:03.229Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:03.659Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:04.091Z",
+      "page": 200,
+      "api": 200
+    },
+    {
+      "time": "2026-11-09T07:48:04.529Z",
+      "page": 200,
+      "api": 200
+    }
+  ],
+  "after": {
+    "ready": true,
+    "frontend": {
+      "ready": true,
+      "state": "running",
+      "port": 3101,
+      "pid": 24032,
+      "httpStatus": 200,
+      "lastCheckedAt": "2026-11-09T07:48:04.967Z",
+      "lastError": null,
+      "restarts": 0,
+      "retryAt": null
+    },
+    "api": {
+      "ready": true,
+      "state": "running",
+      "port": 8001,
+      "pid": 36004,
+      "httpStatus": 200,
+      "lastCheckedAt": "2026-11-09T07:48:04.950Z",
+      "lastError": null,
+      "restarts": 2,
+      "retryAt": null
+    }
+  }
+}

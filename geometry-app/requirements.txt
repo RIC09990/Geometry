@@ -1,0 +1,11 @@
+fastapi==0.135.2
+uvicorn==0.41.0
+newclid==3.0.1
+networkx==3.7
+z3-solver==5.3.3.0
+sympy==1.14.0
+pytest==9.0.2
+httpx==0.28.1
+PyYAML==6.0.3
+reportlab==5.1.0
+pypdf==7.0.0

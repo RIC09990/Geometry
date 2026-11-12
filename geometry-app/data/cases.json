@@ -1,0 +1,589 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "isosceles",
+    "title": "等腰三角形",
+    "version": 1,
+    "points": [
+      {
+        "id": "A",
+        "x": 0,
+        "y": 3.5
+      },
+      {
+        "id": "B",
+        "x": -3,
+        "y": -1.5
+      },
+      {
+        "id": "C",
+        "x": 3,
+        "y": -1.5
+      },
+      {
+        "id": "D",
+        "x": 0,
+        "y": -1.5
+      }
+    ],
+    "segments": [
+      {
+        "id": "AB",
+        "points": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "id": "AC",
+        "points": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "id": "BC",
+        "points": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "id": "AD",
+        "points": [
+          "A",
+          "D"
+        ]
+      }
+    ],
+    "circles": [],
+    "conditions": [
+      {
+        "id": "equal-sides",
+        "kind": "equal_length",
+        "args": [
+          "A",
+          "B",
+          "A",
+          "C"
+        ],
+        "enabled": true,
+        "toggleable": true
+      },
+      {
+        "id": "interior",
+        "kind": "on_segment",
+        "args": [
+          "D",
+          "B",
+          "C"
+        ],
+        "enabled": true,
+        "toggleable": false
+      },
+      {
+        "id": "midpoint",
+        "kind": "midpoint",
+        "args": [
+          "D",
+          "B",
+          "C"
+        ],
+        "enabled": true,
+        "toggleable": true
+      },
+      {
+        "id": "altitude",
+        "kind": "perpendicular",
+        "args": [
+          "A",
+          "D",
+          "B",
+          "C"
+        ],
+        "enabled": true,
+        "toggleable": true
+      }
+    ],
+    "goal": {
+      "id": "goal",
+      "kind": "equal_angle",
+      "args": [
+        "B",
+        "A",
+        "D",
+        "D",
+        "A",
+        "C"
+      ],
+      "enabled": true,
+      "toggleable": true
+    },
+    "nondegenerate": {
+      "distinct": true,
+      "triangles": [
+        [
+          "A",
+          "B",
+          "C"
+        ]
+      ]
+    },
+    "constructions": [],
+    "description": "当中线与高线的条件改变，角平分线还成立吗？",
+    "tag": "条件探究"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "midline",
+    "title": "三角形中位线",
+    "version": 1,
+    "points": [
+      {
+        "id": "A",
+        "x": 0,
+        "y": 3.5
+      },
+      {
+        "id": "B",
+        "x": -3,
+        "y": -1.5
+      },
+      {
+        "id": "C",
+        "x": 3,
+        "y": -1.5
+      },
+      {
+        "id": "D",
+        "x": -1.5,
+        "y": 1
+      },
+      {
+        "id": "E",
+        "x": 1.5,
+        "y": 1
+      }
+    ],
+    "segments": [
+      {
+        "id": "AB",
+        "points": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "id": "AC",
+        "points": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "id": "BC",
+        "points": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "id": "DE",
+        "points": [
+          "D",
+          "E"
+        ]
+      }
+    ],
+    "circles": [],
+    "conditions": [
+      {
+        "id": "d-on",
+        "kind": "on_segment",
+        "args": [
+          "D",
+          "A",
+          "B"
+        ],
+        "enabled": true,
+        "toggleable": false
+      },
+      {
+        "id": "e-on",
+        "kind": "on_segment",
+        "args": [
+          "E",
+          "A",
+          "C"
+        ],
+        "enabled": true,
+        "toggleable": false
+      },
+      {
+        "id": "d-mid",
+        "kind": "midpoint",
+        "args": [
+          "D",
+          "A",
+          "B"
+        ],
+        "enabled": true,
+        "toggleable": true
+      },
+      {
+        "id": "e-mid",
+        "kind": "midpoint",
+        "args": [
+          "E",
+          "A",
+          "C"
+        ],
+        "enabled": true,
+        "toggleable": true
+      }
+    ],
+    "goal": {
+      "id": "goal",
+      "kind": "parallel",
+      "args": [
+        "D",
+        "E",
+        "B",
+        "C"
+      ],
+      "enabled": true,
+      "toggleable": true
+    },
+    "nondegenerate": {
+      "distinct": true,
+      "triangles": [
+        [
+          "A",
+          "B",
+          "C"
+        ]
+      ]
+    },
+    "constructions": [],
+    "description": "连接两边中点，观察平行关系的依据。",
+    "tag": "中点 · 平行"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "bisector",
+    "title": "垂直平分线",
+    "version": 1,
+    "points": [
+      {
+        "id": "A",
+        "x": -3,
+        "y": -1
+      },
+      {
+        "id": "B",
+        "x": 3,
+        "y": -1
+      },
+      {
+        "id": "M",
+        "x": 0,
+        "y": -1
+      },
+      {
+        "id": "P",
+        "x": 0,
+        "y": 3
+      }
+    ],
+    "segments": [
+      {
+        "id": "AB",
+        "points": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "id": "PM",
+        "points": [
+          "P",
+          "M"
+        ]
+      },
+      {
+        "id": "PA",
+        "points": [
+          "P",
+          "A"
+        ]
+      },
+      {
+        "id": "PB",
+        "points": [
+          "P",
+          "B"
+        ]
+      }
+    ],
+    "circles": [],
+    "conditions": [
+      {
+        "id": "m-on",
+        "kind": "on_segment",
+        "args": [
+          "M",
+          "A",
+          "B"
+        ],
+        "enabled": true,
+        "toggleable": false
+      },
+      {
+        "id": "m-mid",
+        "kind": "midpoint",
+        "args": [
+          "M",
+          "A",
+          "B"
+        ],
+        "enabled": true,
+        "toggleable": true
+      },
+      {
+        "id": "p-perp",
+        "kind": "perpendicular",
+        "args": [
+          "P",
+          "M",
+          "A",
+          "B"
+        ],
+        "enabled": true,
+        "toggleable": true
+      }
+    ],
+    "goal": {
+      "id": "goal",
+      "kind": "equal_length",
+      "args": [
+        "P",
+        "A",
+        "P",
+        "B"
+      ],
+      "enabled": true,
+      "toggleable": true
+    },
+    "nondegenerate": {
+      "distinct": true,
+      "triangles": [
+        [
+          "P",
+          "A",
+          "B"
+        ]
+      ]
+    },
+    "constructions": [],
+    "description": "到两个端点等距，需要哪些条件共同成立？",
+    "tag": "垂直 · 等距"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "parallelogram",
+    "title": "平行四边形的对边",
+    "version": 1,
+    "points": [
+      {
+        "id": "A",
+        "x": -2,
+        "y": -1.5
+      },
+      {
+        "id": "B",
+        "x": 2,
+        "y": -1.5
+      },
+      {
+        "id": "C",
+        "x": 3,
+        "y": 2
+      },
+      {
+        "id": "D",
+        "x": -1,
+        "y": 2
+      }
+    ],
+    "segments": [
+      {
+        "id": "AB",
+        "points": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "id": "BC",
+        "points": [
+          "B",
+          "C"
+        ]
+      },
+      {
+        "id": "CD",
+        "points": [
+          "C",
+          "D"
+        ]
+      },
+      {
+        "id": "DA",
+        "points": [
+          "D",
+          "A"
+        ]
+      }
+    ],
+    "circles": [],
+    "conditions": [
+      {
+        "id": "ab-parallel",
+        "kind": "parallel",
+        "args": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "enabled": true,
+        "toggleable": true
+      },
+      {
+        "id": "ad-parallel",
+        "kind": "parallel",
+        "args": [
+          "A",
+          "D",
+          "B",
+          "C"
+        ],
+        "enabled": true,
+        "toggleable": true
+      }
+    ],
+    "goal": {
+      "id": "goal",
+      "kind": "equal_length",
+      "args": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "enabled": true,
+      "toggleable": true
+    },
+    "nondegenerate": {
+      "distinct": true,
+      "triangles": [
+        [
+          "A",
+          "B",
+          "C"
+        ]
+      ]
+    },
+    "constructions": [],
+    "description": "两组对边平行，如何支持对边相等？",
+    "tag": "平行 · 等长"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "base-angles",
+    "title": "等腰三角形的底角",
+    "version": 1,
+    "points": [
+      {
+        "id": "A",
+        "x": 0,
+        "y": 3.5
+      },
+      {
+        "id": "B",
+        "x": -3,
+        "y": -1.5
+      },
+      {
+        "id": "C",
+        "x": 3,
+        "y": -1.5
+      }
+    ],
+    "segments": [
+      {
+        "id": "AB",
+        "points": [
+          "A",
+          "B"
+        ]
+      },
+      {
+        "id": "AC",
+        "points": [
+          "A",
+          "C"
+        ]
+      },
+      {
+        "id": "BC",
+        "points": [
+          "B",
+          "C"
+        ]
+      }
+    ],
+    "circles": [],
+    "conditions": [
+      {
+        "id": "equal-sides",
+        "kind": "equal_length",
+        "args": [
+          "A",
+          "B",
+          "A",
+          "C"
+        ],
+        "enabled": true,
+        "toggleable": true
+      }
+    ],
+    "goal": {
+      "id": "goal",
+      "kind": "equal_angle",
+      "args": [
+        "A",
+        "B",
+        "C",
+        "B",
+        "C",
+        "A"
+      ],
+      "enabled": true,
+      "toggleable": true
+    },
+    "nondegenerate": {
+      "distinct": true,
+      "triangles": [
+        [
+          "A",
+          "B",
+          "C"
+        ]
+      ]
+    },
+    "constructions": [],
+    "description": "从边的相等，走向角的相等。",
+    "tag": "边角关系"
+  }
+]

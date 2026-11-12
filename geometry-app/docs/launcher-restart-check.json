@@ -1,0 +1,9 @@
+{
+  "Stopped": true,
+  "StartedAt": "2026-11-09T20:40:36.3314112+08:00",
+  "WrapperPid": 25664,
+  "ready": true,
+  "repeatedCmd": "reused running instance",
+  "npmRunDev": "reused running instance",
+  "navigationBrowser": "four primary pages, five cases, new topic and return links passed"
+}

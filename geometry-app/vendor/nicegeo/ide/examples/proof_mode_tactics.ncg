@@ -1,0 +1,32 @@
+(* Minimal tactic-script example for proof mode. *)
+
+Theorem id_tactic : (A: Type) -> A -> A
+Proof.
+  intros A a.
+  exact a.
+Qed.
+
+Theorem and_left_tactic : (A: Prop) -> (B: Prop) -> And A B -> A
+Proof.
+  intros A B h.
+  destruct_ands h a b.
+  exact a.
+Qed.
+
+Theorem and_swap_tactic : (A: Prop) -> (B: Prop) -> And A B -> And B A
+Proof.
+  intros A.
+  intros B.
+  intros h.
+  destruct_ands h a b.
+  split.
+    apply b.
+    apply a.
+Qed.
+
+Theorem and_id_tactic : (A: Prop) -> And A A -> A
+Proof.
+  intros A h.
+  destruct_ands h a b.
+  exact a.
+Qed.

@@ -1,0 +1,47 @@
+{
+  "ready": true,
+  "nicegeo": {
+    "status": "runtime_available",
+    "version": "3719c2cc58fda083aaca2c2fa46a57c7a654e623",
+    "source": "https://github.com/nicegeo/nicegeo",
+    "documentedCommand": "dune exec nicegeo file.ncg",
+    "supportedRelations": [
+      "collinear",
+      "equal_angle",
+      "equal_length",
+      "midpoint",
+      "on_circle",
+      "on_segment",
+      "parallel",
+      "perpendicular"
+    ],
+    "reason": "NiceGeo 官方 CLI 已就绪；仅在已实现映射内检查提交的证明脚本。"
+  },
+  "ai": {
+    "provider": "DeepSeek",
+    "model": "deepseek-flash",
+    "configured": false,
+    "message": "尚未配置 DeepSeek 密钥。请在项目 .env.local 中填写 DEEPSEEK_API_KEY，然后点击重新检查。"
+  },
+  "step": {
+    "status": "verified",
+    "message": "NiceGeo 内核已检查此证明。",
+    "nicegeo": {
+      "status": "verified",
+      "version": "3719c2cc58fda083aaca2c2fa46a57c7a654e623",
+      "message": "NiceGeo 内核已检查此证明。",
+      "source": "Theorem GeometryStudentStep : (A: Point) -> (B: Point) -> (C: Point) -> (D: Point) -> (nd0: A ≠ B) -> (nd1: A ≠ C) -> (nd2: A ≠ D) -> (nd3: B ≠ C) -> (nd4: B ≠ D) -> (nd5: C ≠ D) -> (nt0: Not (Exists Line (fun L => OnLine A L /\\ OnLine B L /\\ OnLine C L))) -> (h2: (Between B D C) /\\ (Length B D = Length D C)) -> (Length B D = Length D C)\nProof.\nintro A.\nintro B.\nintro C.\nintro D.\nintro nd0.\nintro nd1.\nintro nd2.\nintro nd3.\nintro nd4.\nintro nd5.\nintro nt0.\nintro h2.\ndestruct_ands h2 midpoint_inside midpoint_lengths.\nexact (Eq.elim Measure (Length D C) (fun v => (Length B D) = v) ((Eq.elim Measure (Length B D) (fun v => (Length B D) = v) ((Eq.intro Measure (Length B D))) (Length D C) (midpoint_lengths))) (Length D C) ((Eq.intro Measure (Length D C)))).\nQed.\n",
+      "raw": "Valid proofs!",
+      "exitCode": 0,
+      "elapsed": 0.093
+    },
+    "constraintCheck": {
+      "outcome": "proven",
+      "message": "在已编码的条件和非退化要求下，目标的否定不可满足。",
+      "engine": "Z3",
+      "encoding": "exact real polynomial constraints"
+    },
+    "constraintLabel": "Z3 对所选前提的独立约束核验；与 NiceGeo 证明脚本检查分别展示",
+    "version": 1
+  }
+}

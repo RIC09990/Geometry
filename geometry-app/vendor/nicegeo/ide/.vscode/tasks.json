@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-nicegeo-ide",
+      "type": "shell",
+      "command": "npm run watch",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": ".*"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^Watching extension, server, and webview builds\\.\\.\\.$",
+          "endsPattern": "^Watching extension, server, and webview builds\\.\\.\\.$"
+        }
+      },
+      "group": "build"
+    }
+  ]
+}

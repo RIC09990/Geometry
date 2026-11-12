@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/nicegeo/nicegeo",
+  "commit": "3719c2cc58fda083aaca2c2fa46a57c7a654e623",
+  "sourceArchiveSha256": "165a796e5a1981082fd6c1eebf2e22c1bad233e156051dadd2c49ef2e5a74512",
+  "license": "MIT",
+  "compiler": "5.4.1",
+  "buildDependencies": {"sedlex": "3.7", "yojson": "3.0.0", "dune": ">=3.17", "menhir": "required by upstream CI"}
+}

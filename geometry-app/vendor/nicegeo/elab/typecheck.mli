@@ -1,0 +1,49 @@
+open Term
+
+(** Type-checking and elaboration of terms and declarations.
+
+    Implements bidirectional type-checking with pattern-unification–based hole inference.
+    Holes written by the user as [_] are automatically filled in based on context. Solved
+    terms are then verified by the trusted kernel before being committed to the
+    environment.
+
+    These functions may raise [Error.ElabError] on failure. *)
+
+(** [process_decl ctx decl] type-checks and adds a single declaration to the elaboration
+    context. *)
+val process_decl : Types.ctx -> Statement.declaration -> unit
+
+(** [elaborate ctx tm ty] elaborates term [tm] with an optional expected type [ty]. Refers
+    to [ctx] for environment entries. Returns a filled term with type [ty], or raises
+    [Error.ElabError]. *)
+val elaborate : Types.ctx -> term -> term option -> term
+
+(** [whnf e tm] computes the weak head normal form of `tm` with respect to the context
+    `e`, recursing into known metavariable solutions and definitions. *)
+val whnf : Types.ctx -> term -> term
+
+(** [infertype ctx lctx tm] returns the inferred type of term [tm] in context [ctx].
+    Refers to [ctx] for environment entries and [lctx] for bound variables. All holes in
+    [tm] must have a relevant entry in [env.metas]. *)
+val infertype : ?depth:int -> Types.ctx -> Types.local_ctx -> term -> term
+
+(** [create_metas ctx tm ids] initializes the [ctx.metas] table with the hole ids present
+    in [tm]. [ids] is the initial list of bids in scope. *)
+val create_metas : Types.ctx -> term -> int list -> unit
+
+(** [replace_metas ctx tm] replaces the metavariables in [tm] with their solved instances.
+    If [complete] is true, then raises an error if any metavariable in [tm] is unsolved.
+*)
+val replace_metas : Types.ctx -> ?complete:bool -> term -> term
+
+(** Takes in two terms [t1] and [t2] (both defined in the same context [e]) and solves for
+    holes assuming that [t1 = t2]. (i.e. "make t1 and t2 definitionally equal") *)
+val unify :
+  ?depth:int ->
+  Types.ctx ->
+  ?lctx:Types.local_ctx ->
+  term ->
+  (int, int) Hashtbl.t ->
+  term ->
+  (int, int) Hashtbl.t ->
+  unit

@@ -1,0 +1,47 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "type": "text/html; charset=utf-8"
+  },
+  {
+    "path": "/ai",
+    "status": 200,
+    "type": "text/html; charset=utf-8"
+  },
+  {
+    "path": "/cases",
+    "status": 200,
+    "type": "text/html; charset=utf-8"
+  },
+  {
+    "path": "/about",
+    "status": 200,
+    "type": "text/html; charset=utf-8"
+  },
+  {
+    "path": "/cases/new",
+    "status": 200,
+    "type": "text/html; charset=utf-8"
+  },
+  {
+    "path": "/ai.rsc",
+    "status": 200,
+    "type": "text/x-component"
+  },
+  {
+    "path": "/cases.rsc",
+    "status": 200,
+    "type": "text/x-component"
+  },
+  {
+    "path": "/euclid-book1-plate1.jpg",
+    "status": 200,
+    "type": "image/jpeg"
+  },
+  {
+    "path": "/api/ai/status",
+    "status": 200,
+    "type": "application/json"
+  }
+]

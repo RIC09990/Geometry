@@ -1,0 +1,207 @@
+[
+  {
+    "path": ".local/before-sharing",
+    "bytes": 11427,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/art-candidates",
+    "bytes": 0,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/newclid2",
+    "bytes": 480458,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/npm-cache",
+    "bytes": 11317,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-ai",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-all",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-cache",
+    "bytes": 10266,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-complete-eight",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-current",
+    "bytes": 11050,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-custom",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-eight-keys",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-final",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-final-release",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-motion",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-motion-final",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-release",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-review",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-review-2",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-simple-prompt",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-student-complete",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-vision-api",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/pytest-vision-ready",
+    "bytes": 38,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/check-ctrl-c.log",
+    "bytes": 175,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/check-force-owner.log",
+    "bytes": 93,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/check-force-wrapper.log",
+    "bytes": 93,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/check-stop.log",
+    "bytes": 261,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview-api.log",
+    "bytes": 3433,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview-frontend.log",
+    "bytes": 1849374,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview-gateway.log",
+    "bytes": 8845,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview-launch-error.log",
+    "bytes": 0,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview-launch.log",
+    "bytes": 238,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview-launcher.err.log",
+    "bytes": 0,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview-launcher.out.log",
+    "bytes": 1886,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview.err.log",
+    "bytes": 0,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview.out.log",
+    "bytes": 0,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/preview.pid",
+    "bytes": 7,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/share-final.err.log",
+    "bytes": 0,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/share-final.out.log",
+    "bytes": 708,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/share-test.err.log",
+    "bytes": 0,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/share-test.out.log",
+    "bytes": 602,
+    "destination": "Windows Recycle Bin"
+  },
+  {
+    "path": ".local/hbg-problem.json",
+    "bytes": 1890,
+    "destination": "Windows Recycle Bin"
+  }
+]

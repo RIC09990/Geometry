@@ -1,0 +1,12 @@
+{
+  "ai/chat": {
+    "status": 503,
+    "detail": "尚未配置 DeepSeek 密钥，请先填写 API Key。"
+  },
+  "ai/review-proof": {
+    "status": 503,
+    "detail": "尚未配置 DeepSeek 密钥，请先填写 API Key。"
+  },
+  "readiness": true,
+  "nicegeo": "runtime_available"
+}

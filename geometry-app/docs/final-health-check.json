@@ -1,0 +1,25 @@
+{
+  "ready": true,
+  "frontend": {
+    "ready": true,
+    "state": "running",
+    "port": 3101,
+    "pid": 24032,
+    "httpStatus": 200,
+    "lastCheckedAt": "2026-11-09T08:28:24.137Z",
+    "lastError": null,
+    "restarts": 0,
+    "retryAt": null
+  },
+  "api": {
+    "ready": true,
+    "state": "running",
+    "port": 8001,
+    "pid": 36004,
+    "httpStatus": 200,
+    "lastCheckedAt": "2026-11-09T08:28:24.116Z",
+    "lastError": null,
+    "restarts": 2,
+    "retryAt": null
+  }
+}
