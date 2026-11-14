@@ -54,7 +54,7 @@ def test_image_search_reads_the_actual_picture_before_selecting_a_query(monkeypa
         return [{'title':'几何资料','url':'https://example.com/geometry','content':'相关数学资料'}]
     async def complete(messages,**kwargs):
         completions.append(messages)
-        assert messages[-1].images and messages[-1].content=='请查看附件。'
+        assert messages[-1].images and messages[-1].content.startswith('请查看附件。')
         if len(completions)==1:
             assert not queries,'attachment placeholder must never reach search'
             return {'content':json.dumps({'mode':'conversation','content':'','searchQuery':'三角形内点 角度 反射法'})}

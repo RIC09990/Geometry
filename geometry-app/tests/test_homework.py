@@ -82,7 +82,8 @@ def test_followup_keeps_context_but_report_only_embeds_current_submission(source
     earlier=[upload('older.png')] if source!='none' else []
     previous=[upload('latest-page-1.png'),upload('latest-page-2.png')] if source!='none' else []
     current=[upload('current.png')] if source=='current' else []
-    expected_context=current or previous
+    groups=[group for group in (earlier,previous,current) if group]
+    expected_context=[image for group in groups for image in group]
     expected=current
     monkeypatch.setattr(ai,'recent_requests',ai.deque());calls=[];rendered=[]
     async def complete(messages,**kwargs):

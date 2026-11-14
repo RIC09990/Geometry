@@ -62,3 +62,39 @@
 @media(max-width:1250px){.app.theme-ai .page-ai{padding:26px 26px 30px}.app.theme-ai .ai-heading{left:16px}.app.theme-ai .ai-relief{right:0;top:95px;width:44vw}}
 @media(max-width:760px){.app.theme-ai .brand{font-size:26px;letter-spacing:2px}.app.theme-ai .page-ai{height:calc(100dvh - 69px);min-height:480px;padding:20px 18px 22px}.app.theme-ai .ai-heading{left:6px;top:56px}.app.theme-ai .ai-heading h1{font-size:clamp(27px,5.5vw,40px)}.app.theme-ai .ai-relief{top:115px;right:0;width:54vw;max-height:52vh}.app.theme-ai .ai-toolbar-actions{gap:8px}.app.theme-ai .ai-toolbar-button{height:38px;padding:0 11px;gap:7px;font-size:12px;border-radius:11px}.app.theme-ai .ai-compose{padding:12px}.app.theme-ai .ai-compose textarea{font-size:13px}.app.theme-ai .ai-compose-bottom{gap:8px 10px}.app.theme-ai .ai-attachments>.text-button,.app.theme-ai .ai-web-toggle,.app.theme-ai .ai-send{font-size:12px;gap:6px}.app.theme-ai .ai-web-toggle{padding-left:12px}.app.theme-ai .ai-send{min-width:76px;padding:0 10px}.app.theme-ai .ai-message{max-width:98%}}
 @media(max-width:430px){.app.theme-ai .brand{font-size:22px;letter-spacing:1px}.app.theme-ai .page-ai{padding:16px 12px 18px}.app.theme-ai .ai-compose{padding:10px}.app.theme-ai .ai-compose-bottom{grid-template-columns:max-content max-content 1fr;gap:6px}.app.theme-ai .ai-send{grid-column:3;min-width:59px;padding:0 8px}.app.theme-ai .ai-web-toggle{padding-left:8px}.app.theme-ai .ai-attachments>.text-button svg,.app.theme-ai .ai-web-toggle svg{width:16px;height:16px}.app.theme-ai .ai-toolbar-button{font-size:11px;padding:0 8px}.app.theme-ai .ai-heading{left:2px}.app.theme-ai .ai-heading h1{font-size:26px}}
+.ai-think{margin:0 0 10px;padding:8px 11px;border:1px solid #dcdce4;border-radius:10px;background:#ffffff59;font-size:12px;color:#5c5c66}
+.ai-think summary{cursor:pointer;color:#6c6c78;list-style:none}
+.ai-think summary::-webkit-details-marker{display:none}
+.ai-think summary::before{content:'▸';display:inline-block;margin-right:6px;transition:transform .15s}
+.ai-think[open] summary::before{transform:rotate(90deg)}
+.ai-think pre{margin:8px 0 0;max-height:38vh;overflow:auto;white-space:pre-wrap;word-break:break-word;font:12px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;color:#585862}
+.app.theme-ai .ai-stream-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:14px;line-height:1.95}
+.app.theme-ai .ai-elapsed{display:block;margin-top:8px;color:#8a8a94;font-size:10px}
+.app.theme-ai .ai-debug{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;padding-top:7px;border-top:1px solid #ffffff66;font-size:10px;color:#7a7a86}
+.app.theme-ai .ai-debug-status{color:#8a7a5a}
+.app.theme-ai .ai-shell{display:flex;gap:22px;height:100%;min-height:0}
+.app.theme-ai .ai-sessions{display:flex;flex-direction:column;flex:0 0 224px;min-height:0;padding:6px 12px 6px 0;border-right:1px solid #d9d9e0}
+.app.theme-ai .ai-sessions-head{display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
+.app.theme-ai .ai-session-new{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;border:1px solid #ffffffb3;border-radius:11px;background:linear-gradient(#ffffff48,#ffffff12);box-shadow:inset 0 1px #ffffff8c;color:#2a2a2e;font:inherit;font-size:13px;cursor:pointer}
+.app.theme-ai .ai-session-new:hover{background:#ffffff70}
+.app.theme-ai .ai-session-search{display:flex;align-items:center;gap:6px;height:32px;padding:0 9px;border:1px solid #dcdce4;border-radius:9px;background:#ffffff59;color:#8a8a94}
+.app.theme-ai .ai-session-search input{flex:1;min-width:0;border:0;background:none;outline:none;font:inherit;font-size:12px;color:#33333a}
+.app.theme-ai .ai-session-list{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin;scrollbar-color:#c2c2ca transparent}
+.app.theme-ai .ai-session{position:relative;display:flex;align-items:center;border-radius:9px}
+.app.theme-ai .ai-session.active{background:#ffffff9c;box-shadow:inset 0 1px #ffffffcc}
+.app.theme-ai .ai-session-open{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:7px 8px;border:0;background:none;text-align:left;cursor:pointer;color:#33333a;font:inherit}
+.app.theme-ai .ai-session-title{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px}
+.app.theme-ai .ai-session-open small{color:#94949e;font-size:10px}
+.app.theme-ai .ai-session-actions{display:flex;gap:2px;padding-right:4px;opacity:0;transition:opacity .12s}
+.app.theme-ai .ai-session:hover .ai-session-actions,.app.theme-ai .ai-session.active .ai-session-actions{opacity:1}
+.app.theme-ai .ai-session-actions button{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:0;border-radius:6px;background:none;color:#8b8b95;cursor:pointer}
+.app.theme-ai .ai-session-actions button:hover{background:#ececf1;color:#55555f}
+.app.theme-ai .ai-session-actions button.confirm{color:#a1564c;background:#f7e9e5}
+.app.theme-ai .ai-session-rename-row{display:flex;align-items:center;gap:2px;width:100%}
+.app.theme-ai .ai-session-rename-row button{display:inline-flex;align-items:center;justify-content:center;width:24px;height:26px;border:0;border-radius:6px;background:none;color:#7c7c86;cursor:pointer}
+.app.theme-ai .ai-session-rename{flex:1;min-width:0;margin:3px 0 3px 4px;padding:5px 7px;border:1px solid #c9c9d3;border-radius:7px;font:inherit;font-size:12px;background:#fff;color:#33333a}
+.app.theme-ai .ai-session-empty{margin:14px 6px;color:#94949e;font-size:11px;line-height:1.8}
+@media(max-width:1020px){.app.theme-ai .ai-shell{flex-direction:column}.app.theme-ai .ai-sessions{flex:0 0 auto;max-height:172px;padding:0 0 8px;margin-bottom:10px;border-right:0;border-bottom:1px solid #d9d9e0}.app.theme-ai .ai-session-list{max-height:110px}}
+.app.theme-ai .ai-shell .ai-chat{flex:1;min-width:0}
+@media(max-width:1020px){.app.theme-ai .ai-shell .ai-chat{flex:1;width:100%}}
+.app.theme-ai .ai-summary{margin:0 0 14px;padding:7px 12px;border:1px dashed #c9c9d3;border-radius:9px;color:#7c7c86;font-size:11px;text-align:center;background:#ffffff59}

@@ -106,7 +106,7 @@ def test_model_requested_current_information_searches_without_checkbox(
 
     async def complete(messages, **kwargs):
         assert_request_configuration(kwargs)
-        assert messages[-1].content == question
+        assert messages[-1].content.startswith(question)
         calls.append(messages)
         if len(calls) == 1:
             return completion('', searchQuery=query)
@@ -192,8 +192,8 @@ def test_explicit_search_uses_the_question_and_bounded_nonduplicate_evidence(mon
     async def complete(messages, **kwargs):
         calls.append(messages)
         assert_request_configuration(kwargs)
-        assert messages[-1].content == question
-        evidence = '\n'.join(m.content for m in messages[:-1])
+        assert messages[-1].content.startswith(question)
+        evidence = '\n'.join(m.content for m in messages)
         assert len(evidence) < 8000
         assert evidence.count('REPEATED-SUMMARY:') == 1
         assert 'https://example.com/0' in evidence
@@ -214,11 +214,12 @@ def test_greeting_recovers_from_conflicting_json_without_searching(monkeypatch):
         calls.append(kwargs)
         assert kwargs['api_key']==KEY and kwargs['provider']==OPTIONS
         assert not kwargs['structured'] and 'JSON' not in kwargs['system']
-        assert messages[-1].content=='hi hi!'
+        assert messages[0].content=='hi hi!'
         if len(calls)==1:
             return {'content':'{"mode":"conversation","content":"Hello"}'
                               '{"mode":"conversation","content":"Hi"}','finishReason':'stop'}
         assert len(calls)==2
+        assert '请重新生成一条可读的问候。' in messages[-1].content
         return completion('Hi! How can I help?',searchQuery='hi')
 
     async def search(*args, **kwargs):
@@ -249,7 +250,7 @@ def test_bad_reply_after_search_is_retried_without_repeating_the_search(monkeypa
         if len(calls)==1:
             return completion('',searchQuery='北京 今日天气预报')
         assert len(calls)<=3
-        assert messages[-1].content==question
+        assert any(message.content.startswith(question) for message in messages)
         assert any(evidence['url'] in message.content for message in messages)
         if len(calls)==3 and recover:
             return completion('预报为晴。')

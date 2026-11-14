@@ -101,7 +101,7 @@ def test_personal_key_is_forwarded_only_to_provider_not_persisted(monkeypatch):
 def test_chat_route_uses_the_request_key_in_personal_mode(monkeypatch):
     monkeypatch.setenv('DEEPSEEK_API_KEY','different-server-unit-key')
     monkeypatch.setattr(ai,'recent_requests',ai.deque())
-    async def completed(messages,*,language,api_key,provider,system,structured):
+    async def completed(messages,*,language,api_key,provider,system,structured,session_id=None):
         assert api_key=='personal-unit-test-key'
         assert system.startswith(ai.SYSTEM) and len(system)<1400
         assert messages[-1].content=='test'

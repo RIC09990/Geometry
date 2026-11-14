@@ -13,13 +13,17 @@ from .constraints import ConstraintSystem
 from .proofs import newclid, teaching_proofs, dependencies
 from .nicegeo_adapter import status as nicegeo_status, check as nicegeo_check
 from .ai import router as ai_router
+from .conversations import router as conversations_router
 from .topics import router as topics_router
+from .topics_store import router as topics_store_router
 from .request_budget import AIRequestBudgetMiddleware
 
 ROOT=Path(__file__).resolve().parents[1]
 app=FastAPI(title='Geometry 计算服务',version='0.1.0',docs_url='/api/docs')
 app.include_router(ai_router)
+app.include_router(conversations_router)
 app.include_router(topics_router)
+app.include_router(topics_store_router)
 capacity=BoundedSemaphore(2)
 
 @app.middleware('http')
@@ -54,11 +58,18 @@ def validate(request:LayoutRequest):
     if request.pinned and request.pinned.id not in {p.id for p in request.problem.points}:raise HTTPException(422,'拖动的点不存在')
     if not set(request.fixedPoints)<={p.id for p in request.problem.points}:raise HTTPException(422,'固定点不存在')
     unencoded=[r.id for r in request.problem.conditions if r.enabled and r.kind=='free_text']
-    if unencoded:
+    if unencoded and not request.ignoreUnencoded:
         return {'status':'unverified','unverifiedConditions':unencoded,'version':request.problem.version,
-                'message':'仍有条件未转成几何约束，无法确认图形符合完整题意；已暂停联动，请先补齐这些条件。'}
-    result=ConstraintSystem(request.problem,normalize=False).layout(request.pinned,request.fixedPoints,request.pinTolerance)
-    return {**result,'version':request.problem.version}
+                'message':'仍有条件未转成几何约束，无法确认图形符合完整题意；已暂停联动。'}
+    target=request.problem
+    if unencoded:
+        target=request.problem.model_copy(update={'conditions':[r for r in request.problem.conditions
+            if not (r.enabled and r.kind=='free_text')]})
+    result=ConstraintSystem(target,normalize=False).layout(request.pinned,request.fixedPoints,request.pinTolerance)
+    if not unencoded:return {**result,'version':request.problem.version}
+    labels=[next((r.description.strip() or r.id) for r in request.problem.conditions if r.id==uid) for uid in unencoded]
+    return {**result,'version':request.problem.version,'unverifiedConditions':unencoded,
+            'message':'示意图只按已编码条件生成，未落实：'+'、'.join(labels)+'。结论仍以补齐后的完整条件为准。'}
 
 @app.post('/api/analyze')
 @bounded

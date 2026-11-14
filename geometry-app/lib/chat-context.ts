@@ -1,29 +1,40 @@
 import type {AiImage} from './ai-files';
 
 export type ChatContextMessage={role:'user'|'assistant';content:string;images?:AiImage[]};
+export type ChatSummary={text:string;through:number};
 
-const MAX_TURNS=4,MAX_MESSAGES=8,MAX_CHARACTERS=12000;
-
-/** Keep recent complete turns without rewriting the current request or UI history. */
-export function buildChatContext(messages:readonly ChatContextMessage[]):ChatContextMessage[]{
+/** Send every retained turn. Length is bounded by compaction, never by dropping turns. */
+export function buildChatContext(messages:readonly ChatContextMessage[],summary?:ChatSummary):ChatContextMessage[]{
  if(!messages.length)return [];
  if(messages[messages.length-1].role!=='user')throw new Error('The current request must be a user message');
- const turns:ChatContextMessage[][]=[];
- for(const message of messages){
-  if(message.role==='user')turns.push([message]);
-  else if(turns.length)turns[turns.length-1].push(message);
+ const first=messages.findIndex(message=>message.role==='user');
+ const start=summary?Math.min(Math.max(summary.through,first),messages.length-1):first;
+ const selected=messages.slice(start).map(message=>({role:message.role,content:message.content,
+  ...(message.role==='user'&&message.images?.length?{images:message.images.map(({name,dataUrl})=>({name,dataUrl}))}:{})}));
+ return summary?[{role:'assistant',content:'早期对话摘要：\n'+summary.text},...selected]:selected;
+}
+
+/** Rough prompt size when the provider reports no usage: half a token per
+ * character plus a fixed cost per image. */
+export function contextTokens(messages:readonly ChatContextMessage[]){
+ let tokens=0;
+ for(const message of messages)tokens+=Array.from(message.content).length*.5+(message.images?.length??0)*1100;
+ return Math.round(tokens);
+}
+
+/** Index that starts the newest complete turns; 0 when there are no more turns to compact. */
+export function recentTurnStart(messages:readonly ChatContextMessage[],turns:number):number{
+ let seen=0;
+ for(let i=messages.length-1;i>=0;i--){
+  if(messages[i].role!=='user')continue;
+  seen++;
+  if(seen===turns)return i;
  }
- const current=turns[turns.length-1],selected=[current];
- let count=current.length,characters=current.reduce((sum,message)=>sum+Array.from(message.content).length,0);
- for(let i=turns.length-2;i>=0&&selected.length<MAX_TURNS;i--){
-  const turn=turns[i],size=turn.reduce((sum,message)=>sum+Array.from(message.content).length,0);
-  // Do not bridge a discarded turn with older context, or cut through a formula.
-  if(count+turn.length>MAX_MESSAGES||characters+size>MAX_CHARACTERS)break;
-  selected.unshift(turn);count+=turn.length;characters+=size;
- }
- const context=selected.flat();
- let latestImages=-1;
- for(let i=context.length-1;i>=0;i--)if(context[i].role==='user'&&context[i].images?.length){latestImages=i;break}
- return context.map((message,i)=>({role:message.role,content:message.content,
-  ...(i===latestImages?{images:message.images!.map(({name,dataUrl})=>({name,dataUrl}))}:{})}));
+ return 0;
+}
+
+/** Index of the current request, used when fewer turns exist than compaction keeps. */
+export function lastUserIndex(messages:readonly ChatContextMessage[]):number{
+ for(let i=messages.length-1;i>=0;i--)if(messages[i].role==='user')return i;
+ return 0;
 }

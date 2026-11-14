@@ -1,5 +1,5 @@
 import {circleGeometry} from '@/lib/arc';
-import {displayFollowers,projectDrawing,validateDrawing} from '@/lib/display-constraints';
+import {displayFollowers,displayProblem,projectDrawing,validateDrawing} from '@/lib/display-constraints';
 import {drawingObjects} from '@/lib/drawing-objects';
 import {ratioLocusGeometry,ratioLocusBounds} from '@/lib/ratio-loci';
 import {normalizeDrawingProblem,type Point,type Problem} from '@/lib/geometry';
@@ -23,7 +23,7 @@ export function createScene(board:any,JX:any,props:()=>BoardProps):BoardScene{
  let disposed=false,lastCoordinates='',revision=0,dragFrame=0;
  let drag:{id:string;moved:boolean}|undefined;
  let pendingTarget:Point|undefined;
- let sceneProblem=normalizeDrawingProblem(props().problem);
+ let sceneProblem=displayProblem(normalizeDrawingProblem(props().problem));
  const visible=(valid:boolean)=>{if(board.containerObj)board.containerObj.style.visibility=valid?'visible':'hidden';props().onConstraintState?.(valid)};
  const create=(kind:string,parents:any[],attrs:any={})=>{const el=board.create(kind,parents,attrs);objects.push(el);return el};
  const hidden={visible:false,name:'',withLabel:false,fixed:true,highlight:false};
@@ -122,7 +122,7 @@ export function createScene(board:any,JX:any,props:()=>BoardProps):BoardScene{
  };
  return {sync(){
   if(disposed)return;
-  const p=normalizeDrawingProblem(props().problem),next=JSON.stringify([p.id,!!props().readOnly,p.points.map(p=>p.id),p.segments,p.circles,p.goal,p.nondegenerate,p.conditions.filter(r=>r.enabled)]);
+  const p=displayProblem(normalizeDrawingProblem(props().problem)),next=JSON.stringify([p.id,!!props().readOnly,p.points.map(p=>p.id),p.segments,p.circles,p.goal,p.nondegenerate,p.conditions.filter(r=>r.enabled)]);
   const structureChanged=next!==signature,firstPlacement=!lastValid.length||p.id!==sceneProblem.id;
   if(drag&&!structureChanged)return;
   const incoming=JSON.stringify(p.points);

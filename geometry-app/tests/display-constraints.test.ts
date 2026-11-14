@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {projectDrawing,validateDrawing} from '../lib/display-constraints';
+import {displayProblem,projectDrawing,validateDrawing} from '../lib/display-constraints';
 import {cleanProblem,normalizeDrawingProblem,type Problem,type Point,type Relation} from '../lib/geometry';
 import catalogue from '../data/cases.json';
 import pressureProblems from './fixtures/competition-geometry.json';
@@ -245,6 +245,14 @@ test('Unknown text and malformed conditions never claim a valid drawing',()=>{
  assert.deepEqual(validateDrawing(p,p.points).unsupported,['text']);assert.equal(projectDrawing(p,p.points,undefined,Nlp).valid,false);
  p.conditions=p.conditions.filter(r=>r.id!=='text');p.conditions[0].args[1]='MISSING';assert.equal(validateDrawing(p,p.points).valid,false);assert.doesNotThrow(()=>projectDrawing(p,p.points,undefined,Nlp));
  assert.equal(projectDrawing(p,p.points,{id:'P',x:NaN,y:0},Nlp).valid,false);
+});
+
+test('Text-only conditions stay out of the drawing instead of blanking it',()=>{
+ const p=efgh();p.conditions.push({id:'text',kind:'free_text',args:[],description:'∠D+∠B=180°',enabled:true,toggleable:true});
+ assert.equal(validateDrawing(p,p.points).valid,false);
+ const drawable=displayProblem(normalizeDrawingProblem(p));assert.equal(validateDrawing(drawable,drawable.points).valid,true);
+ assert.ok(projectDrawing(drawable,drawable.points,undefined,Nlp).valid);
+ assert.equal(p.conditions.length,5);
 });
 
 test('Independent validation rejects degeneracy even when equality residuals vanish',()=>{

@@ -22,14 +22,14 @@ function PageLoading(){
 }
 
 type Page='home'|'cases'|'workspace'|'about'|'about-detail'|'ai'|'new';
-export type Preferences={labels:boolean;reduceMotion:boolean};
+export type Preferences={labels:boolean;reduceMotion:boolean;aiDebug:boolean};
 export function GeometryApp({page,caseId,aboutId}:{page:Page;caseId?:string;aboutId?:string}){
  const t=useT();
  const {language,setLanguage}=useLanguage();
- const [panel,setPanel]=useState<'user'|'settings'|null>(null);const [records,setRecords]=useState<RecordEntry[]>([]);const [prefs,setPrefs]=useState<Preferences>({labels:true,reduceMotion:false});const [notice,setNotice]=useState('');
- useEffect(()=>{const update=()=>setRecords(readRecords());update();window.addEventListener('geometry-records',update);try{const p=JSON.parse(browserStorage.getItem('geometry.settings.v1')||'null');if(p){const clean={labels:p.labels!==false,reduceMotion:!!p.reduceMotion};setPrefs(clean);browserStorage.setItem('geometry.settings.v1',JSON.stringify(clean))}}catch{};return()=>window.removeEventListener('geometry-records',update)},[]);
+ const [panel,setPanel]=useState<'user'|'settings'|null>(null);const [records,setRecords]=useState<RecordEntry[]>([]);const [prefs,setPrefs]=useState<Preferences>({labels:true,reduceMotion:false,aiDebug:true});const [notice,setNotice]=useState('');
+ useEffect(()=>{const update=()=>setRecords(readRecords());update();window.addEventListener('geometry-records',update);try{const p=JSON.parse(browserStorage.getItem('geometry.settings.v1')||'null');if(p){const clean={labels:p.labels!==false,reduceMotion:!!p.reduceMotion,aiDebug:p.v===2?p.aiDebug===true:true};setPrefs(clean);browserStorage.setItem('geometry.settings.v1',JSON.stringify({...clean,v:2}))}}catch{};return()=>window.removeEventListener('geometry-records',update)},[]);
  useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),6000);return()=>clearTimeout(t)},[notice]);
- const savePrefs=(p:Preferences)=>{setPrefs(p);try{browserStorage.setItem('geometry.settings.v1',JSON.stringify(p))}catch{setNotice(t("浏览器没有允许保存设置。"))}};
+ const savePrefs=(p:Preferences)=>{setPrefs(p);try{browserStorage.setItem('geometry.settings.v1',JSON.stringify({...p,v:2}))}catch{setNotice(t("浏览器没有允许保存设置。"))}};
  const isAbout=page==='about'||page==='about-detail';
  const style=page==='ai'?'ai':page==='home'?'glass':isAbout?'stijl':'scrap';
  return <div className={`app theme-${style} ${prefs.reduceMotion?'reduce-motion':''}`}>
@@ -44,14 +44,14 @@ export function GeometryApp({page,caseId,aboutId}:{page:Page;caseId?:string;abou
     {t(page==='cases'&&<CaseCatalogue/>)}
     {t(page==='about'&&<AboutPage/>)}
     {t(page==='about-detail'&&<AboutDetail aboutId={aboutId!} notify={setNotice}/>)}
-    {t(page==='ai'&&<AiChat/>)}
+    {t(page==='ai'&&<AiChat prefs={prefs}/>)}
     {page==='new'&&<NewTopic/>}
     {t(page==='workspace'&&<Workspace key={caseId} caseId={caseId!} notify={setNotice} prefs={prefs}/>)}
     </Suspense>
    </main>
   </div>
   {t(panel==='user'&&<Modal title={t("我的探究")} onClose={()=>setPanel(null)}><div className="visitor"><User size={28}/><div><strong>{t("本机访客")}</strong><p>{t("在当前浏览器查看你的探究记录")}</p></div></div><p className="muted">{t("账号与跨设备同步将在后续版本提供。")}</p><div className="record-list">{t(records.length?records.map(r=><Link key={r.key} href={'/cases/'+encodeURIComponent(r.problem.id)} onClick={()=>{browserStorage.setItem('geometry.draft.'+r.problem.id,JSON.stringify(r.problem));setPanel(null)}}><div><strong>{t(r.name)}</strong><small>{t(r.saved?t("已保存变式"):t("最近探究"))} · {t(new Date(r.time).toLocaleString('zh-CN'))}</small></div><ChevronRight size={18}/></Link>):<div className="empty"><BookOpen size={32}/><p>{t("还没有探究记录")}</p><small>{t("分析题目或保存变式后，会出现在这里。")}</small></div>)}</div></Modal>)}
-  {t(panel==='settings'&&<Modal title={t("设置")} onClose={()=>setPanel(null)}><div className="settings-list"><label><span><strong>{t("语言")}</strong><small>{t("选择界面语言")}</small></span><select aria-label={t("语言")} value={language} onChange={e=>setLanguage(e.target.value as 'zh'|'en')}><option value="zh">{t("中文")}</option><option value="en">English</option></select></label>{t([{key:'labels',title:t("显示点的标签"),desc:t("在几何画板中显示 A、B、C 等点名")},{key:'reduceMotion',title:t("减少动态效果"),desc:t("减少界面和首页装饰的动画")}].map(s=><label key={s.key}><span><strong>{t(s.title)}</strong><small>{t(s.desc)}</small></span><input type="checkbox" checked={prefs[s.key as keyof Preferences]} onChange={e=>savePrefs({...prefs,[s.key]:e.target.checked})}/></label>))}</div><button className="button secondary" onClick={()=>{savePrefs({labels:true,reduceMotion:false});setLanguage('zh');setNotice("已恢复默认设置")}}>{t("恢复默认设置")}</button></Modal>)}
+  {t(panel==='settings'&&<Modal title={t("设置")} onClose={()=>setPanel(null)}><div className="settings-list"><label><span><strong>{t("语言")}</strong><small>{t("选择界面语言")}</small></span><select aria-label={t("语言")} value={language} onChange={e=>setLanguage(e.target.value as 'zh'|'en')}><option value="zh">{t("中文")}</option><option value="en">English</option></select></label>{t([{key:'labels',title:t("显示点的标签"),desc:t("在几何画板中显示 A、B、C 等点名")},{key:'reduceMotion',title:t("减少动态效果"),desc:t("减少界面和首页装饰的动画")},{key:'aiDebug',title:t("显示AI调试信息"),desc:t("在每条回复下显示用时，在输入框下显示缓存命中率和 token 统计")}].map(s=><label key={s.key}><span><strong>{t(s.title)}</strong><small>{t(s.desc)}</small></span><input type="checkbox" checked={prefs[s.key as keyof Preferences]} onChange={e=>savePrefs({...prefs,[s.key]:e.target.checked})}/></label>))}</div><button className="button secondary" onClick={()=>{savePrefs({labels:true,reduceMotion:false,aiDebug:true});setLanguage('zh');setNotice("已恢复默认设置")}}>{t("恢复默认设置")}</button></Modal>)}
   {t(notice&&<div role="status" aria-live="polite" className="toast">{t(notice)}</div>)}
  </div>;
 }

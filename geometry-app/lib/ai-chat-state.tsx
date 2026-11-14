@@ -2,10 +2,15 @@
 import {createContext,useContext,useEffect,useState,useSyncExternalStore,type ReactNode} from 'react';
 import {useAiCredentials} from './ai-credentials';
 import {createAiChatSession,type AiChatSession} from './ai-chat-session';
+import {saveConversation} from './ai-conversations';
 
 const Context=createContext<AiChatSession|undefined>(undefined);
 export function AiChatSessionProvider({children}:{children:ReactNode}){
- const [session]=useState(createAiChatSession),credentials=useAiCredentials();
+ const [session]=useState(()=>createAiChatSession(undefined,undefined,undefined,async document=>{
+  const summary=await saveConversation(document);
+  window.dispatchEvent(new CustomEvent('geometry-conversation-saved',{detail:summary}));
+  return summary;
+ })),credentials=useAiCredentials();
  // This effect belongs to the persistent root, not a page being revisited.
  useEffect(()=>{session.credentialsChanged()},[session,credentials.mode,credentials.key,credentials.config]);
  useEffect(()=>()=>session.dispose(),[session]);

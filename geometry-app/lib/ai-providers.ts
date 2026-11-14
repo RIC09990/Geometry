@@ -8,13 +8,18 @@ export const aiProviders:Record<string,{label:string;config:AiProvider}>={
  compatible:{label:'其他 / 自定义服务',config:{provider:'compatible',baseUrl:'',protocol:'chat',model:''}},
 };
 
-/** Use the requested maximum by default; DeepSeek's medium alias still means high. */
-export function deepseekThinkingEffort(config:AiProvider):'low'|'high'|'max'|undefined{
- if(config.provider!=='deepseek'||!['chat','responses'].includes(config.protocol))return;
- try{const url=new URL(config.baseUrl);if(url.protocol!=='https:'||url.hostname!=='api.deepseek.com')return}catch{return}
- if(config.reasoningEffort==='low')return 'low';
- if(config.reasoningEffort==='medium'||config.reasoningEffort==='high')return 'high';
- return 'max';
+export const officialDeepSeek=(config:AiProvider)=>{
+ if(config.provider!=='deepseek')return false;
+ try{const url=new URL(config.baseUrl);return url.protocol==='https:'&&url.hostname==='api.deepseek.com'}catch{return false}
+};
+/** Picker value for this connection: '' means no thinking parameter, undefined means the protocol has none. */
+export function thinkingLevel(config:AiProvider):'low'|'high'|'max'|''|undefined{
+ if(!config.provider||!['chat','responses'].includes(config.protocol))return;
+ // Official DeepSeek defaults to the requested maximum; DeepSeek's medium alias means high.
+ if(officialDeepSeek(config))
+  return config.reasoningEffort==='low'?'low':config.reasoningEffort==='medium'||config.reasoningEffort==='high'?'high':'max';
+ const effort=config.reasoningEffort;
+ return !effort ? '' : effort==='medium' ? 'high' : effort;
 }
 
 // This local format hint is not authentication. Never probe different services with one key.

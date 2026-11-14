@@ -46,11 +46,12 @@ def test_closed_json_from_a_truncated_score_gets_exactly_one_retry(monkeypatch):
     async def complete(messages, **kwargs):
         calls.append((messages, kwargs))
         assert kwargs['provider'] == OPTIONS and kwargs['api_key'] == KEY
-        assert messages[-1].content == 'original question'
         if len(calls) == 1:
+            assert messages[-1].content == 'original question'
             return grade(finish='length')
         assert len(calls) == 2
-        assert '独立重新核对原始作答' in kwargs['system']
+        assert messages[-2].content == 'original question'
+        assert '独立重新核对原始作答' in messages[-1].content
         result = grade()
         data = json.loads(result['content'])
         # The untruncated pass can include items missing from the first output.
@@ -102,7 +103,7 @@ def test_explicit_search_can_be_refined_once_and_uses_only_new_evidence(monkeypa
 
     async def complete(messages, **kwargs):
         calls.append(messages)
-        assert messages[-1].content == 'original question'
+        assert messages[-1].content.startswith('original question')
         if len(calls) == 1:return completion(searchQuery='refined query')
         assert len(calls) == 2
         evidence = '\n'.join(message.content for message in messages)

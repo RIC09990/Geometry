@@ -1,67 +1,61 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildChatContext,type ChatContextMessage} from '../lib/chat-context';
+import {buildChatContext,recentTurnStart,type ChatContextMessage} from '../lib/chat-context';
 
 const user=(content:string,images?:ChatContextMessage['images']):ChatContextMessage=>({role:'user',content,...(images?{images}:{})});
 const assistant=(content:string):ChatContextMessage=>({role:'assistant',content});
 const picture=(name:string)=>({name,dataUrl:'data:image/png;base64,'+name});
+const pairs=(count:number,offset=0)=>Array.from({length:count},(_,i)=>[user('question '+(i+offset)),assistant('answer '+(i+offset))]).flat();
 
-test('The current question remains last with only three complete preceding turns',()=>{
- const input=Array.from({length:6},(_,i)=>[user('question '+i),assistant('answer '+i)]).flat();
- input.push(user('继续刚才第二步，为什么可以同时除以 2？'));
- const context=buildChatContext(input);
- assert.deepEqual(context,input.slice(6));
- assert.equal(context.length,7);assert.equal(context[0].role,'user');
- assert.equal(context.at(-1)?.content,'继续刚才第二步，为什么可以同时除以 2？');
-});
-
-test('The text budget drops whole old turns without cutting equations or jumping over a missing turn',()=>{
- const formula=String.raw`\[2\angle BOC=\angle BAC+180^\circ\]`;
- const input=[user('An older short question'),assistant('An older short answer'),user('长'.repeat(12000)),assistant(formula),user('继续解释上式。')];
- assert.deepEqual(buildChatContext(input),[input.at(-1)]);
- const fitting=[user('x'.repeat(11900)),assistant(formula),user('继续解释上式。')];
- const context=buildChatContext(fitting);
- assert.deepEqual(context,fitting);assert.equal(context[1].content,formula);
-});
-
-test('A large current request and its attachments remain complete even beyond the text budget',()=>{
- const latest=user('完整原题与解答：\n'+'x'.repeat(14000)+String.raw`\[x+1=2\]`,[picture('current.png')]);
- const context=buildChatContext([user('old'),assistant('old reply'),latest]);
- assert.deepEqual(context,[latest]);
- assert.equal(context[0].content,latest.content);
- assert.deepEqual(context[0].images,latest.images);
-});
-
-test('Unicode character budgeting agrees with the server and preserves complete messages',()=>{
- const input=[user('😀'.repeat(6000)),assistant('答'.repeat(5999)),user('问')];
+test('A conversation inside the high-water budget is sent whole',()=>{
+ const input=[...pairs(6),user('继续刚才第二步，为什么可以同时除以 2？')];
  assert.deepEqual(buildChatContext(input),input);
- assert.deepEqual(buildChatContext([...input.slice(0,2),user('再问')]),[user('再问')]);
 });
 
-test('A new attachment group replaces old images in the request without changing UI history',()=>{
+test('A long conversation is sent whole instead of dropping old turns',()=>{
+ const input=[...pairs(14),user('继续')];
+ assert.deepEqual(buildChatContext(input),input);
+});
+
+test('A very long current turn keeps the history before it',()=>{
+ const latest=user('完整原题与解答：\n'+'x'.repeat(25000)+String.raw`\[x+1=2\]`,[picture('current.png')]);
+ const input=[user('old'),assistant('old reply'),latest];
+ const context=buildChatContext(input);
+ assert.deepEqual(context,input);
+ assert.notEqual(context[2].images,latest.images);
+});
+
+test('Unicode content is preserved in full',()=>{
+ const input=[user('😀'.repeat(12000)),assistant('答'.repeat(12000)),user('再问')];
+ assert.deepEqual(buildChatContext(input),input);
+});
+
+test('Uploads of every retained turn travel with the request',()=>{
  const first=picture('first.png'),second=picture('second.png'),third=picture('third.png');
- const input=[user('第一题',[first]),assistant('第一题解答'),user('第二题',[second,third])];
+ const input=[user('第一题',[first]),assistant('第一题解答'),user('第二题',[second]),assistant('第二题解答'),user('第三题',[third])];
  const before=structuredClone(input),context=buildChatContext(input);
- assert.equal(context[0].images,undefined);
- assert.deepEqual(context[2].images,[second,third]);
+ assert.deepEqual(context[0].images,[first]);
+ assert.deepEqual(context[2].images,[second]);
+ assert.deepEqual(context[4].images,[third]);
  assert.deepEqual(input,before,'UI history and its displayed uploads must remain intact');
- assert.notEqual(context[2].images,input[2].images);
+ assert.notEqual(context[4].images,input[4].images);
 });
 
-test('A text follow-up retains only the latest attachment group still in the selected context',()=>{
+test('A text follow-up retains the newest two attachment groups still in context',()=>{
  const input=[user('第一张',[picture('old.png')]),assistant('答1'),user('第二张',[picture('new-1.png'),picture('new-2.png')]),assistant('答2'),user('继续刚才第二步')];
  const context=buildChatContext(input);
- assert.equal(context[0].images,undefined);
+ assert.deepEqual(context[0].images,input[0].images);
  assert.deepEqual(context[2].images,input[2].images);
  assert.equal(context.at(-1)?.images,undefined);
  assert.equal(context.at(-1)?.content,'继续刚才第二步');
 });
 
-test('Images outside the selected recent turns are not reintroduced',()=>{
- const input=[user('很久前的附件',[picture('old.png')]),assistant('old answer')];
- for(let i=0;i<4;i++)input.push(user('question '+i),assistant('answer '+i));
- input.push(user('本次问题'));
- assert.ok(buildChatContext(input).every(message=>!message.images));
+test('Old uploads stay in context until compaction summarizes them',()=>{
+ const input=[user('很久前的附件',[picture('old.png')]),assistant('old answer'),...pairs(13),user('本次问题')];
+ const context=buildChatContext(input);
+ assert.deepEqual(context[0].images,input[0].images);
+ assert.equal(context.length,input.length);
+ assert.equal(context[0].role,'user');
 });
 
 test('Request messages strip response metadata and non-input image fields',()=>{
@@ -80,9 +74,10 @@ test('Incomplete user turns are preserved and leading orphan assistant messages 
  assert.deepEqual(buildChatContext(input),input.slice(1));
 });
 
-test('An oversized multi-message turn is not split to fit the hard message limit',()=>{
- const input=[user('previous'),...Array.from({length:7},(_,i)=>assistant('fragment '+i)),user('current')];
- assert.deepEqual(buildChatContext(input),[user('current')]);
+test('Assistant groups are never split',()=>{
+ const group=(i:number)=>[user('question '+i),...Array.from({length:6},(_,j)=>assistant('fragment '+i+'-'+j))];
+ const input=[...group(0),...group(1),...group(2),...group(3),user('current')];
+ assert.deepEqual(buildChatContext(input),input);
 });
 
 test('Question wording never heuristically erases context and current formula whitespace is retained',()=>{
@@ -95,4 +90,18 @@ test('Question wording never heuristically erases context and current formula wh
 test('An empty conversation is harmless and a payload without a current user request is rejected',()=>{
  assert.deepEqual(buildChatContext([]),[]);
  assert.throws(()=>buildChatContext([user('question'),assistant('answer')]),/current request/);
+});
+
+test('A stored summary replaces compacted turns and keeps the recent ones',()=>{
+ const input=[...pairs(6),user('继续')];
+ const context=buildChatContext(input,{text:'早期提要',through:8});
+ assert.equal(context[0].role,'assistant');
+ assert.match(context[0].content,/早期对话摘要：\n早期提要/);
+ assert.deepEqual(context.slice(1),input.slice(8));
+});
+
+test('The recent window starts at the newest complete turns',()=>{
+ const input=[...pairs(6),user('继续')];
+ assert.equal(recentTurnStart(input,4),6);
+ assert.equal(recentTurnStart(input,10),0);
 });

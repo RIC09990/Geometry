@@ -13,8 +13,8 @@ import {POST as proxyAi} from '../app/api/[...path]/route';
 import catalogue from '../data/cases.json';
 import type {Problem,Proof} from '../lib/geometry';
 import {cleanProblem} from '../lib/geometry';
-import {readTopics,saveTopic,deleteTopic,openTopic,readTopicDocument} from '../lib/topics';
-import {aiProviders,detectAiProvider,suggestAiModel,deepseekThinkingEffort} from '../lib/ai-providers';
+import {deleteTopic,listTopics,migrateLocalTopics,openTopic,readTopicDocument,saveTopic} from '../lib/topics';
+import {aiProviders,detectAiProvider,suggestAiModel,thinkingLevel,officialDeepSeek,type AiProvider} from '../lib/ai-providers';
 const preset=(i=0)=>structuredClone(catalogue[i]) as Problem;
 
 test('Key format detection does not guess ambiguous tokens or subscription credentials',()=>{
@@ -34,21 +34,28 @@ test('Automatic model selection excludes non-chat models and uses returned IDs o
  assert.equal(suggestAiModel('deepseek',ms('deepseek-v4-pro','deepseek-chat')),'');
  assert.equal(suggestAiModel('deepseek',[]),'');
 });
-test('Thinking controls default to Max for DeepSeek sessions while preserving explicit High and excluding custom services',()=>{
- const selected={...aiProviders.deepseek.config,model:'user-selected-model',reasoningEffort:undefined};
- const initial=structuredClone(selected);
- assert.equal(deepseekThinkingEffort(selected),'max');
- assert.equal(deepseekThinkingEffort({...selected,reasoningEffort:'medium'}),'high');
- assert.equal(deepseekThinkingEffort({...selected,reasoningEffort:'high'}),'high');
- assert.equal(deepseekThinkingEffort({...selected,reasoningEffort:'low'}),'low');
- assert.equal(deepseekThinkingEffort({...selected,reasoningEffort:'max'}),'max');
- assert.equal(deepseekThinkingEffort({...selected,baseUrl:'https://api.deepseek.com/v1',protocol:'responses'}),'max');
- assert.equal(deepseekThinkingEffort({...selected,baseUrl:'https://custom.example/v1'}),undefined);
- assert.equal(deepseekThinkingEffort({...selected,baseUrl:'http://api.deepseek.com'}),undefined);
- assert.equal(deepseekThinkingEffort({...selected,baseUrl:'https://api.deepseek.com.example/v1'}),undefined);
- assert.equal(deepseekThinkingEffort({...selected,provider:'compatible'}),undefined);
- assert.equal(deepseekThinkingEffort({...selected,protocol:'anthropic'}),undefined);
- assert.deepEqual(selected,initial);
+test('Thinking controls default to Max for official DeepSeek and stay opt-in elsewhere',()=>{
+ const official:AiProvider={...aiProviders.deepseek.config,model:'user-selected-model',reasoningEffort:undefined};
+ const initial=structuredClone(official);
+ assert.equal(thinkingLevel(official),'max');
+ assert.equal(thinkingLevel({...official,reasoningEffort:'medium'}),'high');
+ assert.equal(thinkingLevel({...official,reasoningEffort:'high'}),'high');
+ assert.equal(thinkingLevel({...official,reasoningEffort:'low'}),'low');
+ assert.equal(thinkingLevel({...official,reasoningEffort:'max'}),'max');
+ assert.equal(thinkingLevel({...official,baseUrl:'https://api.deepseek.com/v1',protocol:'responses'}),'max');
+ assert.equal(thinkingLevel({...official,protocol:'anthropic'}),undefined);
+ assert.deepEqual(official,initial);
+ const relay:AiProvider={provider:'compatible',baseUrl:'https://relay.example.com/v1',protocol:'chat',model:'deepseek-v4.1-flash'};
+ assert.equal(thinkingLevel(relay),'');
+ assert.equal(thinkingLevel({...relay,reasoningEffort:'max'}),'max');
+ assert.equal(thinkingLevel({...relay,reasoningEffort:'medium'}),'high');
+ assert.equal(thinkingLevel({...relay,reasoningEffort:'low'}),'low');
+ assert.equal(thinkingLevel({...relay,protocol:'responses'}),'');
+ assert.equal(thinkingLevel({...relay,protocol:'gemini'}),undefined);
+ assert.equal(thinkingLevel({...relay,provider:''}),undefined);
+ assert.equal(officialDeepSeek(relay),false);
+ assert.equal(officialDeepSeek({...official,baseUrl:'http://api.deepseek.com'}),false);
+ assert.equal(officialDeepSeek({...official,baseUrl:'https://api.deepseek.com.example/v1'}),false);
  for(const provider of ['openai','anthropic','gemini','compatible'])assert.ok(!Object.hasOwn(aiProviders[provider].config,'reasoningEffort'));
 });
 test('The selected DeepSeek thinking level reaches the API with the original question',async()=>{
@@ -202,18 +209,27 @@ test('Math normalization leaves code examples intact and never enables raw HTML'
 
 
 
-test('Saving and deleting a custom topic preserves unrelated records and the saved problem',()=>{
- const store=new Map<string,string>(),previousStorage=Object.getOwnPropertyDescriptor(globalThis,'localStorage'),previousWindow=Object.getOwnPropertyDescriptor(globalThis,'window');
+test('Saving and deleting a custom topic goes through the local store',async()=>{
+ const store=new Map<string,string>(),calls:{url:string;method:string}[]=[];
+ const previousStorage=Object.getOwnPropertyDescriptor(globalThis,'localStorage'),previousWindow=Object.getOwnPropertyDescriptor(globalThis,'window'),previousFetch=globalThis.fetch;
  Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:(k:string)=>store.get(k)||null,setItem:(k:string,v:string)=>store.set(k,v),removeItem:(k:string)=>store.delete(k)}});
  Object.defineProperty(globalThis,'window',{configurable:true,value:{dispatchEvent:()=>true,localStorage:globalThis.localStorage}});
+ globalThis.fetch=async(url,init)=>{calls.push({url:String(url),method:init?.method||'GET'});return Response.json({deleted:true,id:'custom-test'})};
  try{
   const p={...preset(),id:'custom-test'},topic={id:p.id,problem:p,recognizedText:'test',createdAt:'test',updatedAt:'test'};
-  saveTopic(topic);openTopic(topic);p.conditions[0].enabled=false;
-  assert.equal(readTopics()[0].problem.conditions[0].enabled,true);
+  await saveTopic(topic);openTopic(topic);
+  assert.deepEqual(calls[0],{url:'/api/topics',method:'POST'});
   store.set('geometry.records.v1',JSON.stringify([{problem:{id:'isosceles'}},{problem:{id:topic.id}}]));
-  deleteTopic(topic.id);assert.equal(readTopics().length,0);assert.equal(store.has('geometry.draft.'+topic.id),false);
+  await deleteTopic(topic.id);
+  assert.deepEqual(calls[1],{url:'/api/topics/'+topic.id,method:'DELETE'});
+  assert.equal(store.has('geometry.draft.'+topic.id),false);
   assert.equal(JSON.parse(store.get('geometry.records.v1')!)[0].problem.id,'isosceles');
+  store.set('geometry.topics.v1',JSON.stringify([topic]));
+  assert.equal(await migrateLocalTopics(),1);
+  assert.equal(store.has('geometry.topics.v1'),false);
+  assert.equal(calls[2].url,'/api/topics');
  }finally{
+  globalThis.fetch=previousFetch;
   if(previousStorage)Object.defineProperty(globalThis,'localStorage',previousStorage);else Reflect.deleteProperty(globalThis,'localStorage');
   if(previousWindow)Object.defineProperty(globalThis,'window',previousWindow);else Reflect.deleteProperty(globalThis,'window');
  }

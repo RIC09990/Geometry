@@ -1,6 +1,7 @@
 """Small HTTP adapters; no vendor SDK or model is bundled into the website."""
 import asyncio
 import ipaddress
+import json
 import socket
 from urllib.parse import urlsplit,quote
 from pydantic import BaseModel,Field,model_validator
@@ -68,20 +69,30 @@ async def check_destination(options,transport=None,*,require_model=True):
     if not addresses or any(not ipaddress.ip_address(a[4][0]).is_global for a in addresses):raise HTTPException(422,'接口地址不能指向本机或内网。')
 
 def reasoning_fields(options,protocol=None):
-    """Send an explicit user choice using the selected provider's wire format."""
-    if (options.reasoningEffort is None or options.provider!='deepseek'
-            or urlsplit(options.baseUrl).hostname!='api.deepseek.com'):return {}
+    """Send an explicit user choice using the selected provider's wire format.
+
+    OpenAI-compatible chat and Responses endpoints accept an explicit effort.
+    Anthropic and Gemini use different thinking parameters and are refused
+    instead of silently translated. No level is inferred for a third-party
+    endpoint; only the official DeepSeek host defaults to the maximum.
+    """
+    if options.reasoningEffort is None:return {}
     protocol=protocol or options.protocol
     if protocol not in ('chat','responses'):
-        raise HTTPException(422,'DeepSeek 思考档位请使用 Chat Completions 或 Responses 协议。')
-    effort=options.reasoningEffort
+        raise HTTPException(422,'思考档位仅支持 Chat Completions 或 Responses 协议。')
     # DeepSeek names its middle setting high; medium is an official alias.
-    if effort=='medium':effort='high'
+    effort='high' if options.reasoningEffort=='medium' else options.reasoningEffort
     if protocol=='responses':return {'reasoning':{'effort':effort}}
-    return {'reasoning_effort':effort,'thinking':{'type':'enabled'}}
+    fields={'reasoning_effort':effort}
+    # DeepSeek's Chat protocol turns thinking on with this field. Other
+    # OpenAI-compatible servers may reject unknown fields, so mark only
+    # DeepSeek targets (official host or a DeepSeek model name).
+    if urlsplit(options.baseUrl).hostname=='api.deepseek.com' or 'deepseek' in options.model.lower():
+        fields['thinking']={'type':'enabled'}
+    return fields
 
 
-def request_body(messages,options,system,structured):
+def request_body(messages,options,system,structured,*,stream=False):
     tokens=8192 if structured else 4096
     reasoning=reasoning_fields(options)
     # DeepSeek's thinking and answer share the output budget. The old 4K/8K
@@ -116,13 +127,65 @@ def request_body(messages,options,system,structured):
     for m in messages:
         content=m.content if not m.images else [{'type':'text','text':m.content},*[{'type':'image_url','image_url':{'url':image.dataUrl,**({'detail':'original'} if options.provider=='deepseek' else {})}} for image in m.images]]
         items.append({'role':m.role,'content':content})
-    return 'chat/completions',{'model':options.model,'messages':[{'role':'system','content':system},*items],'stream':False,
+    return 'chat/completions',{'model':options.model,'messages':[{'role':'system','content':system},*items],'stream':stream,
+        **({'stream_options':{'include_usage':True}} if stream else {}),
         **reasoning,
         **({'max_completion_tokens':tokens} if urlsplit(options.baseUrl).hostname=='api.openai.com' else provider_budget),
         **({'response_format':{'type':'json_object'}} if structured else {})}
 
-def provider_headers(options,key):
-    return {'x-api-key':key,'anthropic-version':'2023-06-01'} if options.protocol=='anthropic' else {'x-goog-api-key':key} if options.protocol=='gemini' else {'Authorization':'Bearer '+key}
+
+def stream_chat_events(lines):
+    """Yield ('reasoning'|'text'|'finish'|'usage', value) from Chat Completions SSE.
+
+    Text stays the raw JSON fragment: the caller decodes the tutor envelope.
+    """
+    for line in lines:
+        line=line.strip()
+        if not line.startswith('data:'):continue
+        payload=line[5:].strip()
+        if not payload or payload=='[DONE]':continue
+        try:chunk=json.loads(payload)
+        except ValueError:continue
+        if not isinstance(chunk,dict):continue
+        if isinstance(chunk.get('usage'),dict):yield 'usage',chunk['usage']
+        choices=chunk.get('choices')
+        if not isinstance(choices,list) or not choices:continue
+        choice=choices[0]
+        if not isinstance(choice,dict):continue
+        delta=choice.get('delta')
+        if isinstance(delta,dict):
+            reasoning=delta.get('reasoning_content',delta.get('reasoning'))
+            if isinstance(reasoning,str) and reasoning:yield 'reasoning',reasoning
+            content=delta.get('content')
+            if isinstance(content,str) and content:yield 'text',content
+        finish=choice.get('finish_reason')
+        if isinstance(finish,str) and finish:yield 'finish',finish
+
+
+def normalize_usage(usage):
+    """Normalize provider token counters; omit anything the provider did not report."""
+    if not isinstance(usage,dict):return {}
+    details=usage.get('prompt_tokens_details')
+    cached=usage.get('prompt_cache_hit_tokens',details.get('cached_tokens') if isinstance(details,dict) else None)
+    completion_details=usage.get('completion_tokens_details')
+    reasoning=usage.get('reasoning_tokens',completion_details.get('reasoning_tokens') if isinstance(completion_details,dict) else None)
+    values={'promptTokens':usage.get('prompt_tokens',usage.get('input_tokens')),'cachedTokens':cached,
+            'completionTokens':usage.get('completion_tokens',usage.get('output_tokens')),'reasoningTokens':reasoning}
+    return {k:v for k,v in values.items() if isinstance(v,(int,float)) and not isinstance(v,bool)}
+
+USER_AGENT='Geometry/1.0'
+OPENCODE_SESSION_HEADER='x-opencode-session'
+
+def provider_headers(options,key,session_id=None):
+    headers=({'x-api-key':key,'anthropic-version':'2023-06-01'} if options.protocol=='anthropic'
+             else {'x-goog-api-key':key} if options.protocol=='gemini'
+             else {'Authorization':'Bearer '+key})
+    # Identify the client; OpenCode rejects generic SDK/HTTP-library agents in its abuse policy.
+    headers['User-Agent']=USER_AGENT
+    # OpenCode routes and caches per conversation and returns 400 without this header.
+    if session_id and urlsplit(options.baseUrl).hostname=='opencode.ai':
+        headers[OPENCODE_SESSION_HEADER]=session_id
+    return headers
 
 async def list_models(client,options,key):
     """Read public model metadata from one explicitly selected official service."""
