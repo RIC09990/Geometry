@@ -37,11 +37,12 @@ def test_contradictory_full_score_gets_one_independent_review_with_same_provider
         assert any(message.images==images for message in messages)
         if len(calls)==1:return {'content':json.dumps(contradictory_draft()),'finishReason':'stop'}
         assert len(calls)==2 and kwargs['structured']
-        prompt=kwargs['system']
-        assert '独立重新核对原始作答' in prompt
-        assert messages[-1].content=='Please grade both questions'
+        prompt=kwargs['system'];review=messages[-1].content
+        assert '独立重新核对原始作答' in review
+        assert calls[1][1]['system']==calls[0][1]['system']
+        assert messages[-2].content=='Please grade both questions'
         assert '100/100' not in prompt and 'The fraction calculation is correct.' not in prompt
-        assert 'frac{5}{6}' not in prompt  # No anchoring to the model's own correction.
+        assert 'frac{5}{6}' not in review  # No anchoring to the model's own correction.
         return {'content':json.dumps(verified_reply()),'finishReason':'stop'}
     monkeypatch.setattr(ai,'complete',complete)
     response=TestClient(app).post('/api/ai/chat',headers={'X-AI-Api-Key':'isolated-review-key'},json={

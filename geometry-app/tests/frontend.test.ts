@@ -14,7 +14,7 @@ import catalogue from '../data/cases.json';
 import type {Problem,Proof} from '../lib/geometry';
 import {cleanProblem} from '../lib/geometry';
 import {readTopics,saveTopic,deleteTopic,openTopic,readTopicDocument} from '../lib/topics';
-import {aiProviders,detectAiProvider,suggestAiModel,deepseekThinkingEffort} from '../lib/ai-providers';
+import {aiProviders,detectAiProvider,suggestAiModel,thinkingLevel,officialDeepSeek,type AiProvider} from '../lib/ai-providers';
 const preset=(i=0)=>structuredClone(catalogue[i]) as Problem;
 
 test('Key format detection does not guess ambiguous tokens or subscription credentials',()=>{
@@ -34,21 +34,28 @@ test('Automatic model selection excludes non-chat models and uses returned IDs o
  assert.equal(suggestAiModel('deepseek',ms('deepseek-v4-pro','deepseek-chat')),'');
  assert.equal(suggestAiModel('deepseek',[]),'');
 });
-test('Thinking controls default to Max for DeepSeek sessions while preserving explicit High and excluding custom services',()=>{
- const selected={...aiProviders.deepseek.config,model:'user-selected-model',reasoningEffort:undefined};
- const initial=structuredClone(selected);
- assert.equal(deepseekThinkingEffort(selected),'max');
- assert.equal(deepseekThinkingEffort({...selected,reasoningEffort:'medium'}),'high');
- assert.equal(deepseekThinkingEffort({...selected,reasoningEffort:'high'}),'high');
- assert.equal(deepseekThinkingEffort({...selected,reasoningEffort:'low'}),'low');
- assert.equal(deepseekThinkingEffort({...selected,reasoningEffort:'max'}),'max');
- assert.equal(deepseekThinkingEffort({...selected,baseUrl:'https://api.deepseek.com/v1',protocol:'responses'}),'max');
- assert.equal(deepseekThinkingEffort({...selected,baseUrl:'https://custom.example/v1'}),undefined);
- assert.equal(deepseekThinkingEffort({...selected,baseUrl:'http://api.deepseek.com'}),undefined);
- assert.equal(deepseekThinkingEffort({...selected,baseUrl:'https://api.deepseek.com.example/v1'}),undefined);
- assert.equal(deepseekThinkingEffort({...selected,provider:'compatible'}),undefined);
- assert.equal(deepseekThinkingEffort({...selected,protocol:'anthropic'}),undefined);
- assert.deepEqual(selected,initial);
+test('Thinking controls default to Max for official DeepSeek and stay opt-in elsewhere',()=>{
+ const official:AiProvider={...aiProviders.deepseek.config,model:'user-selected-model',reasoningEffort:undefined};
+ const initial=structuredClone(official);
+ assert.equal(thinkingLevel(official),'max');
+ assert.equal(thinkingLevel({...official,reasoningEffort:'medium'}),'high');
+ assert.equal(thinkingLevel({...official,reasoningEffort:'high'}),'high');
+ assert.equal(thinkingLevel({...official,reasoningEffort:'low'}),'low');
+ assert.equal(thinkingLevel({...official,reasoningEffort:'max'}),'max');
+ assert.equal(thinkingLevel({...official,baseUrl:'https://api.deepseek.com/v1',protocol:'responses'}),'max');
+ assert.equal(thinkingLevel({...official,protocol:'anthropic'}),undefined);
+ assert.deepEqual(official,initial);
+ const relay:AiProvider={provider:'compatible',baseUrl:'https://relay.example.com/v1',protocol:'chat',model:'deepseek-v4.1-flash'};
+ assert.equal(thinkingLevel(relay),'');
+ assert.equal(thinkingLevel({...relay,reasoningEffort:'max'}),'max');
+ assert.equal(thinkingLevel({...relay,reasoningEffort:'medium'}),'high');
+ assert.equal(thinkingLevel({...relay,reasoningEffort:'low'}),'low');
+ assert.equal(thinkingLevel({...relay,protocol:'responses'}),'');
+ assert.equal(thinkingLevel({...relay,protocol:'gemini'}),undefined);
+ assert.equal(thinkingLevel({...relay,provider:''}),undefined);
+ assert.equal(officialDeepSeek(relay),false);
+ assert.equal(officialDeepSeek({...official,baseUrl:'http://api.deepseek.com'}),false);
+ assert.equal(officialDeepSeek({...official,baseUrl:'https://api.deepseek.com.example/v1'}),false);
  for(const provider of ['openai','anthropic','gemini','compatible'])assert.ok(!Object.hasOwn(aiProviders[provider].config,'reasoningEffort'));
 });
 test('The selected DeepSeek thinking level reaches the API with the original question',async()=>{

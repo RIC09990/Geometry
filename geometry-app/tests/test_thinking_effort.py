@@ -4,6 +4,7 @@ import json
 
 import httpx
 import pytest
+from fastapi import HTTPException
 
 from server import ai
 from server.ai_providers import ProviderOptions, request_body, resolve_provider
@@ -49,13 +50,39 @@ def test_explicit_choices_are_not_overridden_by_the_maximum_default(selected,wir
     assert body['messages'][-1]['content']=='Original question'
 
 
-@pytest.mark.parametrize(('provider','url'), [
-    ('deepseek','https://custom.example.com/v1'),('openai','https://api.openai.com/v1'),
-    ('compatible','https://custom.example.com/v1')])
-def test_other_services_do_not_inherit_the_deepseek_effort(provider,url):
-    options=resolve_provider(ProviderOptions(provider=provider,baseUrl=url,model='selected-model',reasoningEffort='max'))
+@pytest.mark.parametrize(('model','thinking'), [
+    ('deepseek-v4.1-flash',{'type':'enabled'}),('gpt-4.1',None)])
+def test_explicit_levels_reach_openai_compatible_services(model,thinking):
+    options=resolve_provider(ProviderOptions(provider='compatible',baseUrl='https://relay.example.com/v1',
+        model=model,protocol='chat',reasoningEffort='max'))
     _,body=request_body([ai.Message(role='user',content='Question')],options,'System',False)
-    assert not {'reasoning','reasoning_effort','thinking'} & body.keys()
+    assert body['reasoning_effort']=='max'
+    assert body.get('thinking')==thinking
+
+
+def test_responses_endpoints_receive_the_effort_in_the_responses_format():
+    options=resolve_provider(ProviderOptions(provider='compatible',baseUrl='https://relay.example.com/v1',
+        model='selected-model',protocol='responses',reasoningEffort='max'))
+    _,body=request_body([ai.Message(role='user',content='Question')],options,'System',False)
+    assert body['reasoning']=={'effort':'max'}
+    assert not {'reasoning_effort','thinking'} & body.keys()
+
+
+def test_third_party_services_are_not_given_a_level_unless_the_user_selects_one():
+    for provider,url in (('deepseek','https://custom.example.com/v1'),('openai','https://api.openai.com/v1'),
+                         ('compatible','https://relay.example.com/v1')):
+        options=resolve_provider(ProviderOptions(provider=provider,baseUrl=url,model='selected-model'))
+        _,body=request_body([ai.Message(role='user',content='Question')],options,'System',False)
+        assert not {'reasoning','reasoning_effort','thinking'} & body.keys()
+
+
+@pytest.mark.parametrize('protocol',['anthropic','gemini'])
+def test_protocols_without_an_effort_field_reject_an_explicit_level(protocol):
+    options=ProviderOptions(provider=protocol,baseUrl='https://api.example.com/v1',model='selected-model',
+        protocol=protocol,reasoningEffort='max')
+    with pytest.raises(HTTPException) as error:
+        request_body([ai.Message(role='user',content='Question')],options,'System',False)
+    assert error.value.status_code==422
 
 
 def test_thinking_metadata_is_not_fed_back_as_user_content():

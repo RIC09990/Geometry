@@ -112,9 +112,9 @@ function proxy(request,response,service,pathname){
   response.writeHead(incoming.statusCode??502,outgoingHeaders);
   incoming.on('error',()=>response.destroy());incoming.pipe(response);
  });
- // AI has a 110-second server deadline covering all model passes and queueing.
+ // AI has a 300-second server budget covering all model passes and queueing.
  // Leave time for its explicit timeout response instead of cutting it off at 60s.
- const timeout=service===api&&pathname.startsWith('/api/ai/')?120000:60000;
+ const timeout=service===api&&pathname.startsWith('/api/ai/')?300000:60000;
  upstream.setTimeout(timeout,()=>upstream.destroy(new Error('上游请求超时')));
  upstream.on('error',error=>{markUnavailable(service,error);unavailable(request,response,service,pathname)});
  request.on('aborted',()=>upstream.destroy());

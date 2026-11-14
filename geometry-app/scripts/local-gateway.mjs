@@ -6,7 +6,7 @@ import {pipeline} from 'node:stream';
 import {compressibleAsset,preferredEncoding,responseCacheControl,staticAssetPath} from './local-assets.mjs';
 const host='127.0.0.1';
 const getApi=new Set(['/api/cases','/api/ai/status']);
-const postApi=new Set(['/api/validate','/api/analyze','/api/check-step','/api/ai/models','/api/ai/chat','/api/ai/review-proof','/api/ai/export-pdf','/api/ai/import-topic','/api/ai/proof-ideas']);
+const postApi=new Set(['/api/validate','/api/analyze','/api/check-step','/api/ai/models','/api/ai/chat','/api/ai/chat/stream','/api/ai/compact','/api/ai/review-proof','/api/ai/export-pdf','/api/ai/import-topic','/api/ai/proof-ideas']);
 const common={'cache-control':'no-store, max-age=0','x-content-type-options':'nosniff','referrer-policy':'same-origin'};
 function reply(res,status,body){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8',...common});res.end(JSON.stringify(body));}
 function varyEncoding(value){return [...new Set(String(value||'').split(',').map(s=>s.trim()).filter(Boolean).concat('Accept-Encoding'))].join(', ');}
@@ -32,8 +32,9 @@ const server=http.createServer((req,res)=>{
   // Client-side navigation requests the same public page with a .rsc suffix.
   const pagePath=pathname.endsWith('.rsc')?pathname.slice(0,-4):pathname;
   const page=/^\/(?:$|ai\/?$|cases(?:\/[a-zA-Z0-9_-]+)?\/?$|about(?:\/[a-zA-Z0-9_-]+)?\/?$)/.test(pagePath);
-  if(api ? !(req.method==='GET'&&getApi.has(pathname)||req.method==='POST'&&postApi.has(pathname))
-    : !['GET','HEAD'].includes(req.method)||!(page||staticAssetPath(pathname)))
+  const conversations=/^\/api\/ai\/conversations(?:\/[0-9a-f-]{36})?$/;
+  const allowedApi=req.method==='GET'&&(getApi.has(pathname)||conversations.test(pathname))||req.method==='POST'&&(postApi.has(pathname)||pathname==='/api/ai/conversations')||(req.method==='PATCH'||req.method==='DELETE')&&conversations.test(pathname);
+  if(api ? !allowedApi : !['GET','HEAD'].includes(req.method)||!(page||staticAssetPath(pathname)))
     return reply(res,404,{detail:'Not found'});
   if(pathname.includes('..')||pathname.endsWith('.map')||pathname.includes('\\'))return reply(res,404,{detail:'Not found'});
   const limit=api?(pathname.startsWith('/api/ai/')?48*1024*1024:262144):0;

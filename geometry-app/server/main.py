@@ -13,12 +13,14 @@ from .constraints import ConstraintSystem
 from .proofs import newclid, teaching_proofs, dependencies
 from .nicegeo_adapter import status as nicegeo_status, check as nicegeo_check
 from .ai import router as ai_router
+from .conversations import router as conversations_router
 from .topics import router as topics_router
 from .request_budget import AIRequestBudgetMiddleware
 
 ROOT=Path(__file__).resolve().parents[1]
 app=FastAPI(title='Geometry 计算服务',version='0.1.0',docs_url='/api/docs')
 app.include_router(ai_router)
+app.include_router(conversations_router)
 app.include_router(topics_router)
 capacity=BoundedSemaphore(2)
 
