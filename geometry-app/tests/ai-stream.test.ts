@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseStreamFrame,streamChatReply,type AiStreamEvent} from '../lib/ai-stream';
+import {parseStreamFrame,streamChatReply,streamRequest,type AiStreamEvent} from '../lib/ai-stream';
 import type {ChatReply} from '../lib/ai-chat-session';
 
 const reply:ChatReply={mode:'solution',pdfEligible:false,grading:null,content:'结论',finishReason:'stop',
@@ -53,4 +53,17 @@ test('A non-2xx response reports the server detail',async()=>{
 
 test('A stream that ends without a reply is rejected instead of guessed',async()=>{
  await assert.rejects(collect(['event: text\ndata: {"text":"半句"}\n\n']),/格式不完整/);
+});
+
+test('Generic streaming returns any done payload and forwards progress',async()=>{
+ const prior=globalThis.fetch;
+ globalThis.fetch=async()=>respondWith([
+  'event: reasoning\ndata: {"text":"读题"}\n\n',
+  'event: done\ndata: {"recognizedText":"题"}\n\n']);
+ try{
+  const events:AiStreamEvent[]=[];
+  const value=await streamRequest<{recognizedText:string}>('/api/ai/import-topic/stream',{},new AbortController().signal,undefined,event=>events.push(event));
+  assert.equal(value.recognizedText,'题');
+  assert.deepEqual(events,[{type:'reasoning',text:'读题'}]);
+ }finally{globalThis.fetch=prior}
 });

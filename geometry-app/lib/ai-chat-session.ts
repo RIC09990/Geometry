@@ -1,30 +1,39 @@
 import {api} from './geometry';
-import {buildChatContext,recentTurnStart,type ChatSummary} from './chat-context';
+import {buildChatContext,contextTokens,lastUserIndex,recentTurnStart,type ChatSummary} from './chat-context';
 import {compactConversation} from './ai-compact';
 import {attachmentImages,attachmentText,type AiAttachment,type AiImage} from './ai-files';
 import {exportImagesForContext,type PdfFeedback} from './pdf-export';
 import type {AiProvider} from './ai-providers';
 import {streamChatReply,type AiStreamEmitter} from './ai-stream';
 import type {AiUsage} from './ai-usage';
+import {storedMessage,type saveConversation} from './ai-conversations';
 
 export type ChatReply=PdfFeedback&{content:string;finishReason?:string;sources?:{title:string;url:string}[];searchStatus?:string|null;reportError?:string;metrics?:AiUsage};
 export type ChatMessage=ChatReply&{id:string;role:'user'|'assistant';images?:AiImage[];reasoning?:string;streaming?:boolean;elapsedMs?:number;usage?:AiUsage};
-export type ChatSessionState={messages:ChatMessage[];draft:string;files:AiAttachment[];readingFiles:boolean;webSearch:boolean;busy:boolean;error:string;unread:boolean;streamStatus?:string;lastUsage?:AiUsage;conversationId:string;summary?:ChatSummary};
+export type ChatSessionState={messages:ChatMessage[];draft:string;files:AiAttachment[];readingFiles:boolean;webSearch:boolean;busy:boolean;error:string;saveError:string;unread:boolean;streamStatus?:string;lastUsage?:AiUsage;conversationId:string;summary?:ChatSummary};
 type SendOptions={language:'zh'|'en';keyMode:'disabled'|'server'|'personal';provider?:AiProvider;headers?:Record<string,string>;emptyPrompt:string};
 type Transport=(body:Record<string,unknown>,signal:AbortSignal,headers?:Record<string,string>,emit?:AiStreamEmitter)=>Promise<ChatReply>;
-const initialState=():ChatSessionState=>({messages:[],draft:'',files:[],readingFiles:false,webSearch:false,busy:false,error:'',unread:false,conversationId:crypto.randomUUID()});
+const initialState=():ChatSessionState=>({messages:[],draft:'',files:[],readingFiles:false,webSearch:false,busy:false,error:'',saveError:'',unread:false,conversationId:crypto.randomUUID(),summary:undefined,lastUsage:undefined,streamStatus:undefined});
 const streamTransport:Transport=(body,signal,headers,emit)=>streamChatReply(body,signal,headers,emit??(()=>{}));
 const requestTransport:Transport=(body,signal,headers)=>api<ChatReply>('ai/chat',body,signal,headers);
 type CompactTransport=(body:{messages:{role:'user'|'assistant';content:string}[];language:'zh'|'en';keyMode:'personal'|'server';provider?:AiProvider},signal:AbortSignal,headers?:Record<string,string>)=>Promise<string>;
 const COMPACT_TOKENS=24000,COMPACT_RECENT_TURNS=4;
 
 /** One in-memory session per root provider. Route subscribers do not own its request. */
-export function createAiChatSession(transport:Transport=streamTransport,fallback:Transport|undefined=transport===streamTransport?requestTransport:undefined,compact:CompactTransport=compactConversation){
+export function createAiChatSession(transport:Transport=streamTransport,fallback:Transport|undefined=transport===streamTransport?requestTransport:undefined,compact:CompactTransport=compactConversation,persist?:typeof saveConversation){
  let state=initialState(),request:AbortController|undefined,visibleViews=0;
+ let saving:Promise<void>=Promise.resolve();
  let liveStream:{conversation:ChatMessage[];message:ChatMessage}|undefined;
  const listeners=new Set<()=>void>();
  const update=(change:Partial<ChatSessionState>|((current:ChatSessionState)=>Partial<ChatSessionState>))=>{
-  state={...state,...(typeof change==='function'?change(state):change)};for(const listener of listeners)listener();
+  const previous=state;
+  state={...state,...(typeof change==='function'?change(state):change)};
+  if(persist&&!state.busy&&state.messages.length&&state.conversationId===previous.conversationId&&
+     (previous.busy||state.messages!==previous.messages||state.summary!==previous.summary||state.lastUsage!==previous.lastUsage)){
+   const document={id:state.conversationId,title:'',messages:state.messages.map(storedMessage),lastUsage:state.lastUsage,...(state.summary?{summary:state.summary}:{})};
+   saving=saving.then(()=>persist(document)).then(()=>{update({saveError:''})},error=>{update({saveError:'会话保存失败：'+(error as Error).message})});
+  }
+  for(const listener of listeners)listener();
  };
  const cancel=(message='')=>{
   const pending=request;request=undefined;pending?.abort();
@@ -37,6 +46,7 @@ export function createAiChatSession(transport:Transport=streamTransport,fallback
   getSnapshot:()=>state,
   getActivity:()=>state.busy?'thinking':state.unread?'ready':'',
   subscribe:(listener:()=>void)=>{listeners.add(listener);return()=>{listeners.delete(listener)}},
+  flushSave:()=>saving,
   update,
   show:()=>{visibleViews++;if(state.unread)update({unread:false});let shown=true;return()=>{if(shown){shown=false;visibleViews=Math.max(0,visibleViews-1)}}},
   stop:()=>cancel('已停止等待回复。'),
@@ -49,14 +59,19 @@ export function createAiChatSession(transport:Transport=streamTransport,fallback
    const submittedDraft=state.draft,submittedFiles=state.files,images=attachmentImages(submittedFiles),turnId=crypto.randomUUID();
    const conversation:ChatMessage[]=[...state.messages,{id:turnId,role:'user',content:(submittedDraft.trim()||options.emptyPrompt)+attachmentText(submittedFiles),...(images.length?{images}:{})}];
    const abort=new AbortController();request=abort;
+   update({busy:true,error:'',unread:false});
    let summary=state.summary;
-   const recentStart=recentTurnStart(conversation,COMPACT_RECENT_TURNS);
-   if((state.lastUsage?.promptTokens??0)>=COMPACT_TOKENS&&recentStart>0){
+   // Providers may report no usage, so also estimate from what would be sent;
+   // with fewer turns than compaction keeps, protect the current request only.
+   const reported=state.lastUsage?.promptTokens??0,estimated=contextTokens(buildChatContext(conversation,summary));
+   const recentStart=recentTurnStart(conversation,COMPACT_RECENT_TURNS)||(summary?summary.through:lastUserIndex(conversation));
+   if((reported>=COMPACT_TOKENS||estimated>=COMPACT_TOKENS)&&recentStart>0){
     const earlier=[...(summary?[{role:'assistant' as const,content:'早期对话摘要：\n'+summary.text}]:[]),...conversation.slice(summary?.through??0,recentStart)];
     if(earlier.length>1){
      update({streamStatus:'compacting'});
      try{
       const text=await compact({messages:earlier.map(({role,content})=>({role,content})),language:options.language,keyMode:options.keyMode as 'personal'|'server',...(options.provider?{provider:options.provider}:{})},abort.signal,options.headers);
+      if(request!==abort||abort.signal.aborted)return;
       summary={text,through:recentStart};
       update({summary});
      }catch{summary=state.summary}
@@ -65,7 +80,7 @@ export function createAiChatSession(transport:Transport=streamTransport,fallback
    if(request!==abort)return;
    update({streamStatus:undefined});
    const context=buildChatContext(conversation,summary);
-   if(JSON.stringify(context).length>47*1024*1024){update({error:'本轮附件超过接口容量，请新建对话后分批发送。'});return}
+   if(JSON.stringify(context).length>47*1024*1024){request=undefined;update({busy:false,error:'本轮附件超过接口容量，请新建对话后分批发送。'});return}
    const body={messages:context,language:options.language,webSearch:state.webSearch,keyMode:options.keyMode,sessionId:state.conversationId,...(options.provider?{provider:options.provider}:{})};
    const startedAt=Date.now(),assistantId=turnId+':answer';
    let streamed:ChatMessage={id:assistantId,role:'assistant',mode:'conversation',pdfEligible:false,grading:null,content:'',streaming:true};

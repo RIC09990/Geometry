@@ -12,27 +12,22 @@ test('A conversation inside the high-water budget is sent whole',()=>{
  assert.deepEqual(buildChatContext(input),input);
 });
 
-test('Exceeding the budget drops whole old turns back to the trim target',()=>{
+test('A long conversation is sent whole instead of dropping old turns',()=>{
  const input=[...pairs(14),user('继续')];
- const context=buildChatContext(input);
- assert.deepEqual(context,input.slice(-11));
- assert.equal(context.length,11);
- assert.equal(context.at(-1)?.content,'继续');
-});
-
-test('A current turn beyond the budget is preserved alone',()=>{
- const latest=user('完整原题与解答：\n'+'x'.repeat(25000)+String.raw`\[x+1=2\]`,[picture('current.png')]);
- const context=buildChatContext([user('old'),assistant('old reply'),latest]);
- assert.deepEqual(context,[latest]);
- assert.equal(context[0].content,latest.content);
- assert.deepEqual(context[0].images,latest.images);
-});
-
-test('Unicode character budgeting agrees with the server and preserves complete messages',()=>{
- const input=[user('😀'.repeat(6000)),assistant('答'.repeat(5999)),user('问')];
  assert.deepEqual(buildChatContext(input),input);
- const oversized=[user('😀'.repeat(12000)),assistant('答'.repeat(12000)),user('再问')];
- assert.deepEqual(buildChatContext(oversized),[user('再问')]);
+});
+
+test('A very long current turn keeps the history before it',()=>{
+ const latest=user('完整原题与解答：\n'+'x'.repeat(25000)+String.raw`\[x+1=2\]`,[picture('current.png')]);
+ const input=[user('old'),assistant('old reply'),latest];
+ const context=buildChatContext(input);
+ assert.deepEqual(context,input);
+ assert.notEqual(context[2].images,latest.images);
+});
+
+test('Unicode content is preserved in full',()=>{
+ const input=[user('😀'.repeat(12000)),assistant('答'.repeat(12000)),user('再问')];
+ assert.deepEqual(buildChatContext(input),input);
 });
 
 test('Uploads of every retained turn travel with the request',()=>{
@@ -55,10 +50,11 @@ test('A text follow-up retains the newest two attachment groups still in context
  assert.equal(context.at(-1)?.content,'继续刚才第二步');
 });
 
-test('Images outside the selected turns are not reintroduced after trimming',()=>{
+test('Old uploads stay in context until compaction summarizes them',()=>{
  const input=[user('很久前的附件',[picture('old.png')]),assistant('old answer'),...pairs(13),user('本次问题')];
  const context=buildChatContext(input);
- assert.ok(context.every(message=>!message.images));
+ assert.deepEqual(context[0].images,input[0].images);
+ assert.equal(context.length,input.length);
  assert.equal(context[0].role,'user');
 });
 
@@ -78,11 +74,10 @@ test('Incomplete user turns are preserved and leading orphan assistant messages 
  assert.deepEqual(buildChatContext(input),input.slice(1));
 });
 
-test('Whole assistant groups are never split at the message limit',()=>{
+test('Assistant groups are never split',()=>{
  const group=(i:number)=>[user('question '+i),...Array.from({length:6},(_,j)=>assistant('fragment '+i+'-'+j))];
  const input=[...group(0),...group(1),...group(2),...group(3),user('current')];
- const context=buildChatContext(input);
- assert.deepEqual(context,[...group(3),user('current')]);
+ assert.deepEqual(buildChatContext(input),input);
 });
 
 test('Question wording never heuristically erases context and current formula whitespace is retained',()=>{

@@ -1,8 +1,11 @@
 import {browserStorage} from '@/lib/browser-storage';
-import {cleanProblem, readRecords, type Problem, type Analysis, type RecordEntry} from './geometry';
+import {cleanProblem, readRecords, type Analysis, type Problem, type RecordEntry} from './geometry';
 
 export type Topic = {id:string;problem:Problem;recognizedText:string;createdAt:string;updatedAt:string;result?:Analysis};
-const KEY='geometry.topics.v1';
+export type TopicSummary = {id:string;title:string;createdAt:string;updatedAt:string;recognizedText:string};
+const LEGACY_KEY='geometry.topics.v1';
+const BASE='/api/topics';
+
 /** Restore a matching snapshot without an older cache hiding a saved AI answer. */
 export function restoreTopicAnalysis(problem:Problem,record?:RecordEntry,topic?:Topic):Analysis|undefined{
  const snapshot=JSON.stringify(cleanProblem(problem));
@@ -23,20 +26,58 @@ export function readTopicDocument(source:string):Problem|undefined{
   if(p.schemaVersion===1&&/^custom-[a-zA-Z0-9-]+$/.test(p.id)&&typeof p.title==='string'&&Array.isArray(p.points)&&Array.isArray(p.conditions)&&p.goal&&p.nondegenerate)return cleanProblem(p);
  }catch{/* Ordinary text attachments continue through image/text recognition. */}
 }
-export function readTopics():Topic[]{
- try{const items=JSON.parse(browserStorage.getItem(KEY)||'[]');return Array.isArray(items)?items.filter(v=>v&&/^custom-/.test(v.id)&&v.problem?.id===v.id&&Array.isArray(v.problem.conditions)):[]}catch{return[]}
+
+async function request<T>(path:string,init?:RequestInit):Promise<T>{
+ let response:Response;
+ try{response=await fetch(path,{...init,headers:{'Content-Type':'application/json',...(init?.headers||{})}})}
+ catch{throw new Error('暂时无法连接本机计算服务，请确认“启动 Geometry.cmd”窗口仍在运行。')}
+ if(!response.ok){
+  let detail='';
+  try{const data=await response.json() as {detail?:unknown};detail=typeof data?.detail==='string'?data.detail:''}catch{}
+  throw new Error(detail||'本机探究记录暂不可用，请稍后重试。');
+ }
+ return response.json() as Promise<T>;
 }
-export function saveTopic(topic:Topic){
- const value={...topic,problem:cleanProblem(topic.problem),updatedAt:new Date().toISOString()};
- browserStorage.setItem(KEY,JSON.stringify([...readTopics().filter(t=>t.id!==topic.id),value]));
+
+export const listTopics=(query='')=>request<TopicSummary[]>(BASE+(query?`?q=${encodeURIComponent(query)}`:''));
+export const loadTopic=(id:string)=>request<Topic>(`${BASE}/${id}`);
+export async function saveTopic(topic:Topic){
+ const saved=await request<TopicSummary>(BASE,{method:'POST',body:JSON.stringify(topic)});
  window.dispatchEvent(new Event('geometry-topics'));
+ return saved;
 }
-export function deleteTopic(id:string){
- if(!readTopics().some(t=>t.id===id))return;
- browserStorage.setItem(KEY,JSON.stringify(readTopics().filter(t=>t.id!==id)));
- browserStorage.setItem('geometry.records.v1',JSON.stringify(readRecords().filter(r=>r.problem.id!==id)));
+export async function renameTopic(id:string,title:string){
+ const saved=await request<TopicSummary>(`${BASE}/${id}`,{method:'PATCH',body:JSON.stringify({title})});
+ window.dispatchEvent(new Event('geometry-topics'));
+ return saved;
+}
+export async function deleteTopic(id:string){
+ await request<{deleted:boolean}>(`${BASE}/${id}`,{method:'DELETE'});
+ const records=readRecords().filter(record=>record.problem.id!==id);
+ browserStorage.setItem('geometry.records.v1',JSON.stringify(records));
  browserStorage.removeItem('geometry.draft.'+id);browserStorage.removeItem('geometry.original.'+id);
  window.dispatchEvent(new Event('geometry-topics'));window.dispatchEvent(new Event('geometry-records'));
+}
+/** Move topics saved by earlier versions out of localStorage once. */
+let migration:Promise<number>|undefined;
+export function migrateLocalTopics(){
+ return migration??=migrateTopics().finally(()=>{migration=undefined});
+}
+async function migrateTopics(){
+ const raw=browserStorage.getItem(LEGACY_KEY);if(!raw)return 0;
+ let items:Topic[]=[];
+ try{items=JSON.parse(raw)}catch{return 0}
+ if(!Array.isArray(items))return 0;
+ let moved=0;
+ for(const [index,topic] of items.entries()){
+  if(!topic?.problem||!/^custom-/.test(topic.id))continue;
+  try{await request<TopicSummary>(BASE,{method:'POST',body:JSON.stringify(topic)})}catch{return moved}
+  moved++;
+  const remaining=items.slice(index+1);
+  if(remaining.length)browserStorage.setItem(LEGACY_KEY,JSON.stringify(remaining));
+  else browserStorage.removeItem(LEGACY_KEY);
+ }
+ return moved;
 }
 export function openTopic(topic:Topic){
  browserStorage.setItem('geometry.draft.'+topic.id,JSON.stringify(topic.problem));

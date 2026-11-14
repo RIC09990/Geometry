@@ -70,7 +70,7 @@ class Message(StrictModel):
 
 
 class ChatRequest(StrictModel):
-    messages: list[Message] = Field(min_length=1, max_length=20)
+    messages: list[Message] = Field(min_length=1, max_length=500)
     language: Literal['zh', 'en'] = 'zh'
     keyMode: Literal['server', 'personal'] = 'server'
     problem:Problem|None=None
@@ -305,29 +305,19 @@ async def chat(request:ChatRequest,personal_key:str|None=Header(default=None,ali
     return await tutor_response(response,chat_report_images(request.messages),request.language)
 
 
-@router.post('/chat/stream')
-async def chat_stream(request:ChatRequest,personal_key:str|None=Header(default=None,alias='X-AI-Api-Key'),legacy_key:str|None=Header(default=None,alias='X-DeepSeek-Api-Key')):
-    """Stream one tutor turn as server-sent events; /chat remains the non-streaming path."""
-    request=prepared_chat(request);original=request.messages[-1];system=chat_system(request)
+def sse_response(produce,language:str='zh'):
+    """Adapt one producer coroutine into a no-store server-sent-event response."""
     queue:asyncio.Queue=asyncio.Queue()
-    async def emit(event):await queue.put(event)
-    async def produce():
-        try:
-            response=await dispatch(request,personal_key or legacy_key,system,structured=True,
-                search_query=original.content,verify_homework=True,emit=emit)
-            reply=await tutor_response(response,chat_report_images(request.messages),request.language)
-            await emit({'type':'done','reply':reply})
-        except HTTPException as error:
-            await emit({'type':'error','detail':error.detail})
-        except asyncio.CancelledError:
-            raise
+    async def run():
+        try:await produce(queue.put)
+        except HTTPException as error:await queue.put({'type':'error','detail':error.detail})
+        except asyncio.CancelledError:raise
         except Exception as error:
             logging.getLogger(__name__).warning('Streaming reply failed (%s)',type(error).__name__)
-            await emit({'type':'error','detail':tutor_format_error(request.language).detail})
-        finally:
-            await queue.put(None)
+            await queue.put({'type':'error','detail':tutor_format_error(language).detail})
+        finally:await queue.put(None)
     async def frames():
-        task=asyncio.create_task(produce())
+        task=asyncio.create_task(run())
         try:
             while True:
                 event=await queue.get()
@@ -342,11 +332,23 @@ async def chat_stream(request:ChatRequest,personal_key:str|None=Header(default=N
     return StreamingResponse(frames(),media_type='text/event-stream',headers={'Cache-Control':'no-store','X-Accel-Buffering':'no'})
 
 
+@router.post('/chat/stream')
+async def chat_stream(request:ChatRequest,personal_key:str|None=Header(default=None,alias='X-AI-Api-Key'),legacy_key:str|None=Header(default=None,alias='X-DeepSeek-Api-Key')):
+    """Stream one tutor turn as server-sent events; /chat remains the non-streaming path."""
+    request=prepared_chat(request);original=request.messages[-1];system=chat_system(request)
+    async def produce(emit):
+        response=await dispatch(request,personal_key or legacy_key,system,structured=True,
+            search_query=original.content,verify_homework=True,emit=emit)
+        reply=await tutor_response(response,chat_report_images(request.messages),request.language)
+        await emit({'type':'done','reply':reply})
+    return sse_response(produce,request.language)
+
+
 COMPACT_MAX_CHARS=4000
 
 
 class CompactRequest(StrictModel):
-    messages:list[Message]=Field(min_length=1,max_length=40)
+    messages:list[Message]=Field(min_length=1,max_length=500)
     language:Literal['zh','en']='zh'
     keyMode:Literal['server','personal']='server'
     provider:ProviderOptions|None=None

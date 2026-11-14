@@ -118,10 +118,10 @@ for(const entry of pressureProblems)test(`Complex pressure drawing: ${entry.name
  }finally{h.cleanup()}
 });
 
-test('Unencoded conditions hide the drawing and cannot emit a misleading preview',()=>{
+test('Text-only conditions never hide an otherwise valid drawing',()=>{
  const problem=circleProblem();problem.conditions.push({id:'unknown',kind:'free_text',args:[],description:'尚未编码的方程',enabled:true,toggleable:true});
  const h=sceneHarness(problem);
- try{h.scene.sync();assert.equal(h.board.containerObj.style.visibility,'hidden');assert.equal(h.previews.length,0);assert.equal(h.states.at(-1),false)}finally{h.cleanup()}
+ try{h.scene.sync();assert.equal(h.board.containerObj.style.visibility,'visible');assert.ok(h.previews.length>0);assert.equal(h.states.at(-1),true)}finally{h.cleanup()}
 });
 
 test('Read-only invalid coordinates are not silently projected into a different counterexample',()=>{

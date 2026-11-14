@@ -38,6 +38,13 @@ function validDrawingReferences(problem:Problem,ids:Set<string>){
  if(goal.kind==='minimize'&&(goal.args.length<2||goal.args.length%2!==0))return false;
  return true;
 }
+/** Text-only conditions state premises the drawing cannot express, so the board
+ * draws the encoded conditions and lists the rest as text. */
+export function displayProblem(problem:Problem){
+ return problem.conditions.some(r=>r.kind==='free_text')
+  ?{...problem,conditions:problem.conditions.filter(r=>r.kind!=='free_text')}
+  :problem;
+}
 /** Independent acceptance gate for imported, dragged and server-returned coordinates.
  * Equality tolerance must never also relax strict domains (distinct points, open
  * segments, nonzero circle radii and angle arms). */

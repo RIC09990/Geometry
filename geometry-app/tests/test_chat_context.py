@@ -26,29 +26,20 @@ def pairs(count, offset=0):
             for message in (user(f'question {index + offset}'), assistant(f'answer {index + offset}'))]
 
 
-def test_a_conversation_inside_the_high_water_budget_is_sent_whole():
-    messages = [*pairs(6), user('current')]
+def test_the_whole_conversation_is_sent():
+    messages = [*pairs(14), user('current')]
     assert prepare_chat_messages(messages) == messages
 
 
-def test_exceeding_the_budget_drops_whole_old_turns_back_to_the_trim_target():
-    messages = [*pairs(14), user('current')]
-    result = prepare_chat_messages(messages)
-    assert result == messages[-11:]
-    assert len(result) == 11
-
-
-def test_latest_input_over_budget_is_complete_and_keeps_its_uploads():
+def test_a_very_long_current_turn_keeps_the_history_before_it():
     latest = user('current attachment text ' * 4000, 'page 1', 'page 2')
-    result = prepare_chat_messages([user('old'), assistant('old answer'), latest])
-    assert result == [latest]
-    assert len(result[0].content) > 24000
+    messages = [user('old'), assistant('old answer'), latest]
+    assert prepare_chat_messages(messages) == messages
+    assert len(messages[-1].content) > 24000
 
 
-def test_character_boundary_matches_the_browser_code_point_count():
-    messages = [user('u' * 12000), assistant('a' * 12000), user('?')]
-    assert prepare_chat_messages(messages) == [messages[-1]]
-    messages = [user('😀' * 5000), assistant('角' * 5000), user('?')]
+def test_unicode_content_is_preserved_in_full():
+    messages = [user('😀' * 12000), assistant('角' * 12000), user('?')]
     assert prepare_chat_messages(messages) == messages
 
 
@@ -67,17 +58,17 @@ def test_uploads_of_every_retained_turn_travel_with_the_request():
     assert [message.model_dump() for message in messages] == before
 
 
-def test_images_outside_the_selected_turns_are_not_reintroduced():
+def test_old_uploads_stay_in_context_until_compaction_summarizes_them():
     messages = [user('old upload', 'old page'), assistant('old answer'), *pairs(13), user('explain')]
     result = prepare_chat_messages(messages)
-    assert result == messages[-11:]
-    assert not any(message.images for message in result)
+    assert result == messages
+    assert result[0].images == messages[0].images
 
 
-def test_whole_assistant_groups_are_never_split_at_the_message_limit():
+def test_assistant_groups_are_never_split():
     group = lambda index: [user(f'question {index}'), *(assistant(f'fragment {index}-{fragment}') for fragment in range(6))]
     messages = [*group(0), *group(1), *group(2), *group(3), user('current')]
-    assert prepare_chat_messages(messages) == [*group(3), user('current')]
+    assert prepare_chat_messages(messages) == messages
 
 
 def test_orphan_assistant_prefix_is_dropped_but_cancelled_user_turns_survive():
@@ -98,6 +89,13 @@ def test_content_is_not_rewritten_or_used_to_guess_a_topic_switch(latest):
 def test_invalid_request_end_is_rejected(messages):
     with pytest.raises(ValueError, match='user message'):
         prepare_chat_messages(messages)
+
+
+def test_a_long_conversation_of_short_turns_is_accepted():
+    from server.ai import ChatRequest, prepared_chat
+    messages = [{'role': 'user' if index % 2 == 0 else 'assistant', 'content': f'message {index}'}
+                for index in range(61)]
+    assert len(prepared_chat(ChatRequest(messages=messages)).messages) == 61
 
 
 def test_actual_message_model_removes_response_metadata_before_context_selection():

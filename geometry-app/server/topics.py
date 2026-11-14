@@ -7,11 +7,11 @@ from fastapi import APIRouter, Header, HTTPException
 from pydantic import Field, ValidationError, field_validator, model_validator
 import z3
 
-from .ai import ImageInput, Message, ChatRequest, dispatch
+from .ai import ImageInput, Message, ChatRequest, dispatch, sse_response
 from .constraints import ConstraintSystem
 from .models import KINDS, StrictModel, Problem, Relation
 from .import_normalization import normalize_problem
-from .ai_providers import ProviderOptions
+from .ai_providers import ProviderOptions, resolve_provider
 from .homework import read_ai_json
 from .spatial_conditions import spatial_statement
 
@@ -25,6 +25,7 @@ class ImportRequest(StrictModel):
     previousText: str = Field(default='', max_length=20000)
     previousDraft: dict | None = None
     conversation: list[Message] = Field(default_factory=list, max_length=16)
+    reasoningEffort: Literal['low','medium','high','max']|None=None
     language: Literal['zh', 'en'] = 'zh'
     keyMode: Literal['personal', 'server'] = 'server'
     provider: ProviderOptions|None=None
@@ -112,8 +113,7 @@ def read_json(content: str):
         raise HTTPException(502, 'AI 未返回完整的题目数据，请重新识别；没有用预设例题替代。') from None
 
 
-@router.post('/import-topic')
-async def import_topic(request:ImportRequest,personal_key:str|None=Header(default=None,alias='X-AI-Api-Key'),legacy_key:str|None=Header(default=None,alias='X-DeepSeek-Api-Key')):
+async def run_import(request:ImportRequest,personal_key:str|None,legacy_key:str|None,emit=None)->dict:
     schema = ImportReply.model_json_schema()
     task = ('请识别附件中的几何题，转为可编辑的题目。返回符合下列 schema 的单个 JSON 对象，不要 Markdown。'
             'recognizedText 保留实际读到的题目文字；uncertainties 列出看不清、需用户核对的内容；'
@@ -151,10 +151,28 @@ async def import_topic(request:ImportRequest,personal_key:str|None=Header(defaul
             '\n此前核对对话：' + json.dumps([{'role':m.role,'content':m.content} for m in request.conversation],ensure_ascii=False) +
             '\n上次尚未整理完整的题目：' + (json.dumps(request.previousDraft,ensure_ascii=False) if request.previousDraft else '无') +
             '\nJSON schema：' + json.dumps(schema, ensure_ascii=False) + '\n用户补充：' + request.description)
+    provider = resolve_provider(request.provider)
+    effort = request.reasoningEffort or ('low' if provider.reasoningEffort in (None,'high','max') else provider.reasoningEffort)
+    if provider.protocol in ('chat','responses'):
+        provider = provider.model_copy(update={'reasoningEffort':effort})
     response = await dispatch(ChatRequest(messages=[Message(role='user', content=task, images=request.images)],
-                                         language=request.language,keyMode=request.keyMode,provider=request.provider),personal_key or legacy_key,structured=True)
+                                         language=request.language,keyMode=request.keyMode,provider=provider),personal_key or legacy_key,structured=True,emit=emit)
     parsed = decode_import(response['content'], response.get('finishReason') == 'length')
     return {**parsed.model_dump(),'provider':response.get('provider','AI'),'requiresConfirmation':True}
+
+
+@router.post('/import-topic')
+async def import_topic(request:ImportRequest,personal_key:str|None=Header(default=None,alias='X-AI-Api-Key'),legacy_key:str|None=Header(default=None,alias='X-DeepSeek-Api-Key')):
+    return await run_import(request,personal_key,legacy_key)
+
+
+@router.post('/import-topic/stream')
+async def import_topic_stream(request:ImportRequest,personal_key:str|None=Header(default=None,alias='X-AI-Api-Key'),legacy_key:str|None=Header(default=None,alias='X-DeepSeek-Api-Key')):
+    """Stream recognition progress, then the same payload as /import-topic."""
+    async def produce(emit):
+        payload=await run_import(request,personal_key,legacy_key,emit)
+        await emit({'type':'done','reply':payload})
+    return sse_response(produce,request.language)
 
 
 class IdeasRequest(StrictModel):

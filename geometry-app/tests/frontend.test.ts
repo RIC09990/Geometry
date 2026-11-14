@@ -13,7 +13,7 @@ import {POST as proxyAi} from '../app/api/[...path]/route';
 import catalogue from '../data/cases.json';
 import type {Problem,Proof} from '../lib/geometry';
 import {cleanProblem} from '../lib/geometry';
-import {readTopics,saveTopic,deleteTopic,openTopic,readTopicDocument} from '../lib/topics';
+import {deleteTopic,listTopics,migrateLocalTopics,openTopic,readTopicDocument,saveTopic} from '../lib/topics';
 import {aiProviders,detectAiProvider,suggestAiModel,thinkingLevel,officialDeepSeek,type AiProvider} from '../lib/ai-providers';
 const preset=(i=0)=>structuredClone(catalogue[i]) as Problem;
 
@@ -209,18 +209,27 @@ test('Math normalization leaves code examples intact and never enables raw HTML'
 
 
 
-test('Saving and deleting a custom topic preserves unrelated records and the saved problem',()=>{
- const store=new Map<string,string>(),previousStorage=Object.getOwnPropertyDescriptor(globalThis,'localStorage'),previousWindow=Object.getOwnPropertyDescriptor(globalThis,'window');
+test('Saving and deleting a custom topic goes through the local store',async()=>{
+ const store=new Map<string,string>(),calls:{url:string;method:string}[]=[];
+ const previousStorage=Object.getOwnPropertyDescriptor(globalThis,'localStorage'),previousWindow=Object.getOwnPropertyDescriptor(globalThis,'window'),previousFetch=globalThis.fetch;
  Object.defineProperty(globalThis,'localStorage',{configurable:true,value:{getItem:(k:string)=>store.get(k)||null,setItem:(k:string,v:string)=>store.set(k,v),removeItem:(k:string)=>store.delete(k)}});
  Object.defineProperty(globalThis,'window',{configurable:true,value:{dispatchEvent:()=>true,localStorage:globalThis.localStorage}});
+ globalThis.fetch=async(url,init)=>{calls.push({url:String(url),method:init?.method||'GET'});return Response.json({deleted:true,id:'custom-test'})};
  try{
   const p={...preset(),id:'custom-test'},topic={id:p.id,problem:p,recognizedText:'test',createdAt:'test',updatedAt:'test'};
-  saveTopic(topic);openTopic(topic);p.conditions[0].enabled=false;
-  assert.equal(readTopics()[0].problem.conditions[0].enabled,true);
+  await saveTopic(topic);openTopic(topic);
+  assert.deepEqual(calls[0],{url:'/api/topics',method:'POST'});
   store.set('geometry.records.v1',JSON.stringify([{problem:{id:'isosceles'}},{problem:{id:topic.id}}]));
-  deleteTopic(topic.id);assert.equal(readTopics().length,0);assert.equal(store.has('geometry.draft.'+topic.id),false);
+  await deleteTopic(topic.id);
+  assert.deepEqual(calls[1],{url:'/api/topics/'+topic.id,method:'DELETE'});
+  assert.equal(store.has('geometry.draft.'+topic.id),false);
   assert.equal(JSON.parse(store.get('geometry.records.v1')!)[0].problem.id,'isosceles');
+  store.set('geometry.topics.v1',JSON.stringify([topic]));
+  assert.equal(await migrateLocalTopics(),1);
+  assert.equal(store.has('geometry.topics.v1'),false);
+  assert.equal(calls[2].url,'/api/topics');
  }finally{
+  globalThis.fetch=previousFetch;
   if(previousStorage)Object.defineProperty(globalThis,'localStorage',previousStorage);else Reflect.deleteProperty(globalThis,'localStorage');
   if(previousWindow)Object.defineProperty(globalThis,'window',previousWindow);else Reflect.deleteProperty(globalThis,'window');
  }

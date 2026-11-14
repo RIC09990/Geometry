@@ -222,7 +222,13 @@ class ConstraintSystem:
                 if result['status']=='sat':
                     return result
             self.solver.set(timeout=self.timeout)
-            return self.check_placement()
+            result=self.check_placement()
+            if result['status']=='unknown':
+                # A single timeout on nonlinear circle constraints is not evidence
+                # of a contradiction; retry once with a wider budget before saying so.
+                self.solver.set(timeout=max(self.timeout*3,20000))
+                result=self.check_placement()
+            return result
         finally:
             self.solver.pop()
             self.solver.set(timeout=self.timeout)

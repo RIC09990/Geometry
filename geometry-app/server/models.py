@@ -169,6 +169,7 @@ class AnalyzeRequest(StrictModel):
 
 class LayoutRequest(StrictModel):
     problem: Problem
+    ignoreUnencoded:bool=False
     pinned: Point | None = None
     fixedPoints: list[str] = Field(default_factory=list)
     pinTolerance:float=Field(default=0,ge=0,le=.001)
